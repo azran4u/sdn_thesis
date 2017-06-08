@@ -1,6 +1,7 @@
 close all
 clc
 
+
 [G, sourcesAndRecieversCell] = buildNetworkModel();
 
 p = plotNetworkGraph( G );
