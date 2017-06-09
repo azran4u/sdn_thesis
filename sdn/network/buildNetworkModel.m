@@ -8,6 +8,7 @@ function [G, srcAndRecCell] = buildNetworkModel(type, numOfRouters, edgeVertices
     end
     
     if strcmp(type,'wan')
+        buildWanNetwork();
     end
 
 end
