@@ -2,7 +2,8 @@ close all
 clc
 
 
-[G, sourcesAndRecieversCell] = buildNetworkModel();
+%[G, sourcesAndRecieversCell] = network.buildNetworkModel();
+[G, sourcesAndRecieversCell] = sdn.network.buildNetworkModel('simple', 10, 2, 3, 4, 100, 150, 30);
 
 p = plotNetworkGraph( G );
 
