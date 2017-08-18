@@ -1,4 +1,4 @@
-function [ G ] = buildWanNetwork( )
+function [ G ] = buildNetwork( )
 
     % network parameters
     minNumOfRouters = 10;    
@@ -146,7 +146,16 @@ function [ G ] = buildWanNetwork( )
     highlight(h,find(strcmp('router',G.Nodes.types)),'NodeColor','r');
     highlight(h,find(strcmp('content',G.Nodes.types)),'NodeColor','b');
     highlight(h,find(strcmp('reciever',G.Nodes.types)),'NodeColor','y');
-    title(['num of rcv: ', num2str(numOfRcv)],'Color', 'y');    
-
+    title(['#sources = ', num2str(numOfSources) ' #routers = ', num2str(numOfRouters) ' #content = ', num2str(numOfContents) ' #recievers = ', num2str(numOfRcv)]);    
+    hold on;
+    
+    % just for legend that is not related to the graph
+    h = zeros(3, 1);
+    h(1) = plot(NaN,NaN,'g');
+    h(2) = plot(NaN,NaN,'r');
+    h(3) = plot(NaN,NaN,'b');
+    h(4) = plot(NaN,NaN,'y');
+    legend(h, 'souce','router', 'content', 'reciever');
+    
 end
 
