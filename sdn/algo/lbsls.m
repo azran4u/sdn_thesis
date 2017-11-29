@@ -1,21 +1,10 @@
-function [ G, requestTable ] = lbsls( G )
+% 
+function [ G, requestTable ] = lbsls( G, requestTableInput )
 
-    % remove all served layers above BL from G
-    
-    
-    % run LBS algorithm
-    
-    % 
-    
-    % global variables - number of layers per content
-    setGlobal_numOfLayersPerContent(3);
-
-    % build request table
-    % columns - {reciever, content, layer, bw}
-    % go over all recievers and populate table
-    requestTable = buildRequestTable(G);
+    % read request table
+    requestTable = requestTableInput;
            
-    % remove 
+    % sort requests by layer
     requestTable = sortrows(requestTable,{'layer'},{'ascend'});
     
     % matlab uses only 'Weight' variable as cost so we set it 
@@ -32,7 +21,7 @@ function [ G, requestTable ] = lbsls( G )
         valid = gama_k_i.valid;
         ck_bw = gama_k_i.bw;
                 
-        % if the request isn't vaild (Eg. don't supply EL1 if BL is not)
+        % if the request isn't vaild skip it (Eg. don't supply EL1 if BL is not)
         if( valid ~= 1 )
             continue;
         end

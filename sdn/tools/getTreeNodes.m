@@ -1,4 +1,3 @@
-
 % get all nodes in tree that are part of (content,layer) tree
 function nodes = getTreeNodes(G, content , layer)
 

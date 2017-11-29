@@ -1,4 +1,4 @@
-function T = buildRequestTable(G)
+function [T] = buildRequestTable(G)
     
     % build new table
     T = cell2table(cell(0,10), 'VariableNames', {'reciever', 'content', 'layer', 'valid', 'bw', 'duration', 'allPathsFound', 'allPathsFoundLatencies', 'selectedPath', 'selectedPathLatency'});
