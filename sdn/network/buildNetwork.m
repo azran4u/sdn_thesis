@@ -1,33 +1,41 @@
+% build network by parameters
 function [ G ] = buildNetwork( )
 
     % network parameters
-    minNumOfRouters = 10;    
-    maxNumOfRouters = 10;
-    numOfRouters = randi([minNumOfRouters maxNumOfRouters],1,1);
-    disp(['numOfRouters: ', num2str(numOfRouters)]);
+    minNumOfRouters = 6;    
+    maxNumOfRouters = 15;
+    minEdgeRoutersRatio = 2;
+    maxEdgeRoutersRatio = 4;
+    minBw = 2;
+    maxBw = 10;
+    minLatency = 5;
+    maxLatency = 100;
+    minJitter = 1;
+    maxJitter = 5;
+    minNumOfSources = 5;
+    contentSourceRatio = 2;
+    rcvContentRatio = 4;
+    maxLayer = 2; % Base layer (=0), Enhancement layer 1, Enhanacement layer 2.
+    baseLayerMaxBW = 2;
+    baseLayerMinBW = 0.5;
+    baseLayerIntervalBW = 0.25;
+    enhancementLayer1MaxBW = 3;
+    enhancementLayer1MinBW = 1;
+    enhancementLayer1IntervalBW = 0.25;
+    enhancementLayer2MaxBW = 3.5;
+    enhancementLayer2MinBW = 1.5;
+    enhancementLayer2IntervalBW = 0.25;
+    numOfLayersPerContent = 3;
     
-    minEdgeRoutersRatio = 3;
-    maxEdgeRoutersRatio = 3;
+    % number of routers
+    numOfRouters = randi([minNumOfRouters maxNumOfRouters],1,1);  
     edgeRoutersRatio = randi([minEdgeRoutersRatio maxEdgeRoutersRatio],1,1);
     
-    % prevents 
+    % prevents multiple edges between same routers
     if edgeRoutersRatio > numOfRouters
         edgeRoutersRatio = numOfRouters-1;
     end
-    disp(['edgeRoutersRatio: ', num2str(edgeRoutersRatio)]);
     
-    minBw = 100;
-    maxBw = 100;
-    
-    minLatency = 150;
-    maxLatency = 150;
-    
-    minJitter = 25;
-    maxJitter = 25;
-    
-    %numOfRouters = 1+round(rand(1)*maxNumOfRouters);
-    
-    %edgeRoutersRatio = max(2+round(rand(1)*maxEdgeRoutersRatio), numOfRouters-1);
     numOfEdges = numOfRouters * edgeRoutersRatio;
    
     % build edges
@@ -56,7 +64,7 @@ function [ G ] = buildNetwork( )
     G.Nodes.types = types;
     
     % ******** add sources *****************
-    maxNumOfSources = maxNumOfRouters;
+    maxNumOfSources = min(minNumOfSources,maxNumOfRouters);
     numOfSources = 1+round(rand(1)*maxNumOfSources);
         
     % each source is connected to one router only. same router may serve
@@ -80,15 +88,7 @@ function [ G ] = buildNetwork( )
     types(:) = {'source'};
     G.Nodes.types((numOfRouters+1):(numOfRouters+numOfSources)) = types;
     
-    % plot the routers and sources
-    figure(1);   
-    h = plot(G,'EdgeLabel',G.Edges.bw);
-    highlight(h,find(strcmp('source',G.Nodes.types)),'NodeColor','g');
-    highlight(h,find(strcmp('router',G.Nodes.types)),'NodeColor','r');
-    title(['num of sources', num2str(numOfSources)]);
-    
     % ********** add contents **************
-    contentSourceRatio = 2;
     sourceNodes = find(strcmp('source',G.Nodes.types));
     numOfSources = size(sourceNodes, 1);
     numOfContents = numOfSources * contentSourceRatio;
@@ -111,9 +111,8 @@ function [ G ] = buildNetwork( )
     types = cell( numOfContents ,1);
     types(:) = {'content'};
     G.Nodes.types(s) = types; 
-   
-    % ************** add recivers *****************
-    rcvContentRatio = 3;
+    
+    % ************** add recivers *****************    
     contentNodes = find(strcmp('content',G.Nodes.types));
     numOfContents = size(contentNodes, 1);
     numOfRcv = numOfContents * rcvContentRatio;
@@ -134,28 +133,71 @@ function [ G ] = buildNetwork( )
     EdgeTable = table([s' t'], bw, latency, jitter, 'VariableNames',{'EndNodes' 'bw' 'latency' 'jitter'});
     G = addedge(G, EdgeTable);
     
-    % set type as 'content'
+    % set type as 'reciever'
     types = cell( numOfRcv ,1);
     types(:) = {'reciever'};
     G.Nodes.types(t) = types;
+
+    % add for each reciever the priority (Gold=1, Silver=2, Bronze = 3) 
+    numOfNodes = size(G.Nodes,1);    
+    recieverPriority = zeros(numOfNodes,1);
+    recieverNodes = find(strcmp('reciever',G.Nodes.types));
+    recieverPriority(recieverNodes) = randsample([1:1:3],numOfRcv, true);
+    G.Nodes.recieverPriority = recieverPriority;
     
-    % plot the routers and sources
-    figure(1);   
-    h = plot(G,'EdgeLabel',G.Edges.bw);
-    highlight(h,find(strcmp('source',G.Nodes.types)),'NodeColor','g');
-    highlight(h,find(strcmp('router',G.Nodes.types)),'NodeColor','r');
-    highlight(h,find(strcmp('content',G.Nodes.types)),'NodeColor','b');
-    highlight(h,find(strcmp('reciever',G.Nodes.types)),'NodeColor','y');
-    title(['#sources = ', num2str(numOfSources) ' #routers = ', num2str(numOfRouters) ' #content = ', num2str(numOfContents) ' #recievers = ', num2str(numOfRcv)]);    
-    hold on;
+    % add for each reciever the requested content (only one) 
+    requestedContent = zeros(numOfNodes,1);
+    recieverNodes = find(strcmp('reciever',G.Nodes.types));
+    requestedContent(recieverNodes) = randsample(contentNodes,numOfRcv, true);
+    G.Nodes.requestedContent = requestedContent;
     
-    % just for legend that is not related to the graph
-    h = zeros(3, 1);
-    h(1) = plot(NaN,NaN,'g');
-    h(2) = plot(NaN,NaN,'r');
-    h(3) = plot(NaN,NaN,'b');
-    h(4) = plot(NaN,NaN,'y');
-    legend(h, 'souce','router', 'content', 'reciever');
+    % add for each reciever the requested layer (max)
+    requestedLayer = zeros(numOfNodes,1);
+    requestedLayer(recieverNodes) = randsample([0:maxLayer],numOfRcv, true);
+    G.Nodes.requestedLayer = requestedLayer;
+    
+    % add for each content the desired bw for base layer 
+    baseLayerBW = zeros(numOfNodes,1);
+    contentNodes = find(strcmp('content',G.Nodes.types));
+    baseLayerBW(contentNodes) = randsample([baseLayerMinBW:baseLayerIntervalBW:baseLayerMaxBW],numOfContents, true);
+    G.Nodes.baseLayerBW = baseLayerBW;
+    
+    % add for each content the desired bw for enhancement layer 1 
+    enhancementLayer1BW = zeros(numOfNodes,1);
+    contentNodes = find(strcmp('content',G.Nodes.types));
+    enhancementLayer1BW(contentNodes) = randsample([enhancementLayer1MinBW:enhancementLayer1IntervalBW:enhancementLayer1MaxBW],numOfContents, true);
+    G.Nodes.enhancementLayer1BW = enhancementLayer1BW;
+    
+    % add for each content the desired bw for enhancement layer 2
+    enhancementLayer2BW = zeros(numOfNodes,1);
+    contentNodes = find(strcmp('content',G.Nodes.types));
+    enhancementLayer2BW(contentNodes) = randsample([enhancementLayer2MinBW:enhancementLayer2IntervalBW:enhancementLayer2MaxBW],numOfContents, true);
+    G.Nodes.enhancementLayer2BW = enhancementLayer2BW;
+   
+    % create new field for each node and edge that represents the usage of the graph element in the tree (content, layer)
+    G.Nodes.usedFor = zeros(G.numnodes,numOfContents*numOfLayersPerContent);
+    G.Edges.usedFor = zeros(G.numedges,numOfContents*numOfLayersPerContent);
+    
+    % build distribution tree for each (content,layer) pair
+     setGlobal_firstContent( contentNodes(1) );
+            
+    % run over all content nodes
+    for content = contentNodes'
+     
+        % run over each layer
+        for layer = 0:(getGlobal_numOfLayersPerContent() - 1)
+            
+            % calculate the index of the (content, layer) tree
+            index = treeIndex(getGlobal_firstContent(),getGlobal_numOfLayersPerContent(), content , layer);
+            
+            % set the value to '1' becuase the content node is always part of every layer 
+            G.Nodes.usedFor(content, index) = 1;
+            
+        end
+        
+    end
     
 end
+
+
 
