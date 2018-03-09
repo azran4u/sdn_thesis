@@ -1,0 +1,14 @@
+function [ outputG, outputRequestTable ] = simulation( G )
+    
+    N = 10;
+    
+    [requestTable] = buildRequestTable(G);  
+    
+    for t = [1:N]
+        [ newG, newRequestTable ] = generateSimulation(G, requestTable);
+        [ outputG, outputRequestTable ] = lbsls( newG, newRequestTable );
+        r = revenue( outputRequestTable );
+        
+    end
+    
+end

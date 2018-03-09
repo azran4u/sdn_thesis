@@ -13,8 +13,6 @@ function plotAllTrees( G, requestTable )
         plotTree( G, requestTable, treeIndex );
         
     end
-    
- 
-
+   
 end
 

@@ -1,5 +1,5 @@
 % implementation of LBSLS algorithm
-function [ G, requestTable ] = lbsls( G, requestTableInput )
+function [ G, requestTable ] = new_lbsls( G, requestTableInput )
 
     % read request table
     requestTable = requestTableInput;
@@ -16,17 +16,7 @@ function [ G, requestTable ] = lbsls( G, requestTableInput )
     % run over all requests, base layer first, EL1 second, and so on.
     for row = 1:height(requestTable)
         
-        % get request parameters
-        gama_k_i = requestTable(row, :);
-        
-        % extract values from request
-        dk = gama_k_i.reciever;
-        ck = gama_k_i.content;
-        lk = gama_k_i.layer;
-        valid = gama_k_i.valid;
-        ck_bw = gama_k_i.bw;
-        ck_maximumLatency = G.Nodes.contentMaximumLatency(ck); % content's maximum accepted latency. set by admin, not the client
-        ck_maximumJitter = G.Nodes.contentMaximumJitter(ck);  % content's maximum accepted jitter. set by admin, not the client
+        [dk,ck,lk,valid,ck_bw,ck_maximumLatency,ck_maximumJitter] = readRequestParameters(G, requestTable , row);
         
         % if the request isn't vaild skip it (Eg. don't supply EL1 if BL is not)
         if( valid ~= 1 )
@@ -66,7 +56,7 @@ function [ G, requestTable ] = lbsls( G, requestTableInput )
             end
             
             % find path's latency from dk--->v + v--->ck
-              delta_p = delta_p + G.Nodes.treeLatency(v,sckiTree);
+            delta_p = delta_p + G.Nodes.treeLatency(v,sckiTree);
             
             % find path's jitter
             sigma_p = 0;
@@ -92,7 +82,7 @@ function [ G, requestTable ] = lbsls( G, requestTableInput )
                 % build a query
                 baseLayer = requestTable.content == ck & requestTable.reciever == dk & requestTable.layer==0;
 
-                % perform the query and get the latnecy of the previous layer
+                % perform the query and get the latnecy of the base layer
                 baseLayerLatency = requestTable.selectedPathLatency(baseLayer);
                 
                 % check if the latency gap from base layer is too high
@@ -114,12 +104,15 @@ function [ G, requestTable ] = lbsls( G, requestTableInput )
         
         end
         
-        % here, we finished to find all possible paths for current request,
-        % let's pick the best one
-
-        % if we couldn't  find any paths we skip upper layers
+        % here, we finished to find the best path for each node in the
+        % current tree scki.
+        
+        % if P is empty, we couldn't  find any paths we skip upper layers
         if isempty(P)        
 
+            % if we couldn't find path for base layer, try removing EL's
+            
+            
             % set current layer and upper layers as invalid
             for lk_i = lk:getGlobal_numOfLayersPerContent()
                 rowToInvalid = requestTable.reciever==dk & requestTable.content==ck & requestTable.layer==lk_i;
@@ -128,20 +121,13 @@ function [ G, requestTable ] = lbsls( G, requestTableInput )
 
         % if we did find one or more paths    
         else        
-
-            % prefer path that end with router
-            %if( ~strcmp('router',G.Nodes.types(v)) )
-            %    continue;
-            %end
-            
+          
             % choose the path with minimum latency
-            [minLatency , IndexOfMinLatencyPath] = min(delta_P);
-                        
-            
+            [minLatency , IndexOfMinLatencyPath] = min(delta_P);                                    
             minLatencyPathsIndices = delta_P==minLatency;
             
             % if we found more than one path with minimum latency pick the shortest
-            % one
+            % one (hop count)
             if( size(minLatencyPathsIndices, 2) > 1 )
                 
                 shortestPathIndex = 0;

@@ -1,84 +1,55 @@
-% implementation of LBSLS algorithm
-function [ G, requestTable ] = lbsls( G, requestTableInput )
+% find minimum latency path between two nodes in G while path bandwidth > bw.
+% the tree index is input so we can find end to end latencies and jitter.
 
-    % read request table
-    requestTable = requestTableInput;
-           
-    % sort requests by layer
-    requestTable = sortrows(requestTable,{'layer'},{'ascend'});
-    
+% for each path return:
+% full path, e2e latency, e2e jitter, e2e maximum available bandwidth, e2e hop count
+% if no path found, isempty(path)=true
+function [ pathProperties ] = findLowLatencyPathFromA2B( G, source, destination, bw, sckiTree )
+
+    pathProperties = cell2table(cell(0,7), 'VariableNames', {
+        'source', 
+        'destination', 
+        'path',
+        'latency', 
+        'jitter', 
+        'maximumAvailableBW', 
+        'hopCount'});
+
+    path = [];
+    latency = inf;
+    jitter = inf;
+    maximumAvailableBW = 0;
+    hopCount = inf;
+                
     % matlab uses only 'Weight' variable as cost so we set it 
     G.Edges.Weight = G.Edges.latency;
-    
-    % read the maximum latency needed for decodable video
-    maxDecodableLatencyThreshold = getGlobal_decodableLatencyThreshold();
-    
-    % run over all requests, base layer first, EL1 second, and so on.
-    for row = 1:height(requestTable)
         
-        % get request parameters
-        gama_k_i = requestTable(row, :);
-        
-        % extract values from request
-        dk = gama_k_i.reciever;
-        ck = gama_k_i.content;
-        lk = gama_k_i.layer;
-        valid = gama_k_i.valid;
-        ck_bw = gama_k_i.bw;
-        ck_maximumLatency = G.Nodes.contentMaximumLatency(ck); % content's maximum accepted latency. set by admin, not the client
-        ck_maximumJitter = G.Nodes.contentMaximumJitter(ck);  % content's maximum accepted jitter. set by admin, not the client
-        
-        % if the request isn't vaild skip it (Eg. don't supply EL1 if BL is not)
-        if( valid ~= 1 )
-            continue;
-        end
-        
-        % remove all edges that don't conform the bw requierment
-        H = removeEdgesBelow( G, ck_bw );
-           
-        % P holds all paths we find, delta_P holds the corresponding
-        % latencies, sigma_P holds the corresponding jitters
-        P = {};
-        delta_P = [];
-        sigma_P = [];
-        minLatency = 0;
-        IndexOfMinLatencyPath = 0;
-            
-        % get all nodes that are part of (content,layer)
-        scki = getTreeNodes(G, ck , lk);
-        sckiTree=treeIndex(ck, lk);
-          
-        % count the number of paths we found fo current ck,lk
-        numberOfPathsFound = 0;
-        
-        % run over each node the content traverse thru and find the
-        % distance (latency) from receiver
-        for v = scki'
-            
-            % find shortest path (minimum latency) from  source/content to reciever       
-            % p : shortest path
-            % delta_p : latency of p from dk--->v
-            [p,delta_p] = shortestpath(H,v,dk);
-            
-            % if we found nothing, continue
-            if( isempty(p) )
-                continue
-            end
-            
-            % find path's latency from dk--->v + v--->ck
-              delta_p = delta_p + G.Nodes.treeLatency(v,sckiTree);
+    % remove all edges that don't conform the bw requierment
+    H = removeEdgesBelow( G, bw );
+
+    % find shortest path (minimum latency) from  source/content to reciever       
+    [path,latency] = shortestpath(H,source,destination);
+
+    % if we found nothing, continue
+    if( isempty(path) )                                
+        pathProperties = {source, destination, path, latency, jitter, maximumAvailableBW, hopCount};               
+        return;
+    end
+
+    % find path's latency from dk--->v + v--->ck
+    latency = latency + G.Nodes.treeLatency(v,sckiTree);
             
             % find path's jitter
             sigma_p = 0;
-            for i = 1:(size(p,2)-1)
-                sigma_p = sigma_p + G.Edges.jitter(findedge(G,p(i),p(i+1)));
+            for i = 1:(size(path,2)-1)
+                sigma_p = sigma_p + G.Edges.jitter(findedge(G,path(i),path(i+1)));
             end
                 
             % find path's jitter from dk--->v + v--->ck
             sigma_p = sigma_p + G.Nodes.treeJitter(v,sckiTree);
             
             % check if the path meets the delay and jitter requirements
-            if( delta_p > ck_maximumLatency ) 
+            if( latency > ck_maximumLatency ) 
                 continue
             end
                 
@@ -92,11 +63,11 @@ function [ G, requestTable ] = lbsls( G, requestTableInput )
                 % build a query
                 baseLayer = requestTable.content == ck & requestTable.reciever == dk & requestTable.layer==0;
 
-                % perform the query and get the latnecy of the previous layer
+                % perform the query and get the latnecy of the base layer
                 baseLayerLatency = requestTable.selectedPathLatency(baseLayer);
                 
                 % check if the latency gap from base layer is too high
-                if( abs(delta_p - baseLayerLatency)  > maxDecodableLatencyThreshold  )
+                if( abs(latency - baseLayerLatency)  > maxDecodableLatencyThreshold  )
                     continue
                 end
                         
@@ -108,18 +79,21 @@ function [ G, requestTable ] = lbsls( G, requestTableInput )
             numberOfPathsFound = numberOfPathsFound + 1;
 
             % add path to P and delta_P
-            P{1,numberOfPathsFound} = p;
-            delta_P(numberOfPathsFound) = delta_p;
+            P{1,numberOfPathsFound} = path;
+            delta_P(numberOfPathsFound) = latency;
             sigma_P(numberOfPathsFound) = sigma_p;             
         
         end
         
-        % here, we finished to find all possible paths for current request,
-        % let's pick the best one
-
-        % if we couldn't  find any paths we skip upper layers
+        % here, we finished to find the best path for each node in the
+        % current tree scki.
+        
+        % if P is empty, we couldn't  find any paths we skip upper layers
         if isempty(P)        
 
+            % if we couldn't find path for base layer, try removing EL's
+            
+            
             % set current layer and upper layers as invalid
             for lk_i = lk:getGlobal_numOfLayersPerContent()
                 rowToInvalid = requestTable.reciever==dk & requestTable.content==ck & requestTable.layer==lk_i;
@@ -128,20 +102,13 @@ function [ G, requestTable ] = lbsls( G, requestTableInput )
 
         % if we did find one or more paths    
         else        
-
-            % prefer path that end with router
-            %if( ~strcmp('router',G.Nodes.types(v)) )
-            %    continue;
-            %end
-            
+          
             % choose the path with minimum latency
-            [minLatency , IndexOfMinLatencyPath] = min(delta_P);
-                        
-            
+            [minLatency , IndexOfMinLatencyPath] = min(delta_P);                                    
             minLatencyPathsIndices = delta_P==minLatency;
             
             % if we found more than one path with minimum latency pick the shortest
-            % one
+            % one (hop count)
             if( size(minLatencyPathsIndices, 2) > 1 )
                 
                 shortestPathIndex = 0;

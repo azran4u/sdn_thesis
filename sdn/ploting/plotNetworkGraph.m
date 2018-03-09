@@ -7,7 +7,7 @@ function [p] = plotNetworkGraph( G )
     
     % plot the routers and sources
     figure;   
-    h = plot(G,'EdgeLabel',G.Edges.bw);
+    h = plot(G,'EdgeLabel',G.Edges.bw, 'Layout','force');
     highlight(h,find(strcmp('source',G.Nodes.types)),'NodeColor','g');
     highlight(h,find(strcmp('router',G.Nodes.types)),'NodeColor','m');
     highlight(h,find(strcmp('content',G.Nodes.types)),'NodeColor','b');

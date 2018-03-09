@@ -1,0 +1,11 @@
+function [ newG, requestTable ] = generateSimulation(G);
+    
+    probability = rand;
+    
+    if probability < 0.2
+    	newG = eventLinkFailure(G);
+    end
+    
+    [requestTable] = buildRequestTable(newG);  
+    
+end
