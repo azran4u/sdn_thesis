@@ -38,16 +38,9 @@ function [ G, requestTable ] = new_lbsls( G, requestTableInput )
                 
         end
         
-        if( ~isempty(P) )
+        % if we found nothing...
+        if( isempty(P) )
             
-            % select one path from P with the following priorities:
-            % 1. minimum latency. 
-            % 2. maximum avialabe bw. 
-            % 3. minimum hop count
-            % 4. random
-            path = lbslsMinLatencyMaxAvialableBW(G, P);
-          
-        
             % if BL could not be served
             if( layer == 0 )
                 % try to remove EL's for this BL
@@ -60,7 +53,7 @@ function [ G, requestTable ] = new_lbsls( G, requestTableInput )
          % P isn't empty   
         else
             
-
+            % choose the path with minimum latency
             
         end
             

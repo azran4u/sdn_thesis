@@ -1,0 +1,17 @@
+function [ path ] = lbslsMinLatencyMaxAvialableBW( G, paths )
+    
+    table = pathsToTable( G, paths );
+    
+    
+    rows = table.latency==min(table.latency);
+    table(rows);
+    
+        allPaths = cell2table(cell(0,5), 'VariableNames', {
+        'path',
+        'latency', 
+        'jitter', 
+        'availableBW', 
+        'hopCount'});
+    
+end
+

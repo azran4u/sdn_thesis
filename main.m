@@ -21,6 +21,8 @@ end
 
 plotNetworkGraph( G );
 
+allPaths  = allPathsBetweenNodes( G, 9, 10 );
+
 simulation(G);
 
 
