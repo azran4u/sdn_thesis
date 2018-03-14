@@ -14,6 +14,9 @@ function [ path ] = lbslsPathSelectionAlgorithm( G, paths )
     table = data;
     
     % find maximum avialable bw
+    rows = table.availableBW==max(table.availableBW);      
+    data = table(rows, :);
+    table = data;
     
     % find minimum hop count
     rows = table.hopCount==min(table.hopCount);

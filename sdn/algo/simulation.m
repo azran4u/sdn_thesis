@@ -1,6 +1,6 @@
 function [ outputG, outputRequestTable ] = simulation( G )
     
-    N = 10;
+    N = 1;
     
     [newRequestTable] = buildRequestTable(G);  
     allRevenues = [];
