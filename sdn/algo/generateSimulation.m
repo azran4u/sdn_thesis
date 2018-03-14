@@ -1,6 +1,7 @@
 function [ newG, newRequestTable ] = generateSimulation(G, requestTable)
     
-    probability = rand;
+    %probability = rand;
+    probability = 0.5;
     
     % event of link failure, same requests
     if probability < 0.2

@@ -2,8 +2,8 @@
 function [ G ] = buildNetwork( )
 
     % network parameters
-    minNumOfRouters = 7;    
-    maxNumOfRouters = 7;
+    minNumOfRouters = 3;    
+    maxNumOfRouters = 5;
     minEdgeRoutersRatio = 2;
     maxEdgeRoutersRatio = 4;
     minBw = 2;
@@ -15,10 +15,10 @@ function [ G ] = buildNetwork( )
     minNumOfSources = 1;
     contentSourceRatio = 1;
     rcvContentRatio = 2;
-    contentMinAcceptedLatency = 150;
-    contentMaxAcceptedLatency = 250;
-    contentMinAcceptedJitter = 30;
-    contentMaxAcceptedJitter = 50;
+    contentMinAcceptedLatency = 500;
+    contentMaxAcceptedLatency = 1000;
+    contentMinAcceptedJitter = 500;
+    contentMaxAcceptedJitter = 1000;
     maxLayer = 2; % Base layer (=0), Enhancement layer 1, Enhanacement layer 2.
     baseLayerMaxBW = 2;
     baseLayerMinBW = 0.5;

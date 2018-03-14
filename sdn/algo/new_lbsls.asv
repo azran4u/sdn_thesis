@@ -21,10 +21,10 @@ function [ G, requestTable ] = new_lbsls( G, requestTableInput )
         P = [];
         
         % remove edges that don't meet the bandwidth requiremnt
-        H = removeEdgesBelow( G, ck_bw );
+        H = removeEdgesBelow( G, request.bw );
         
         % get all nodes that are part of (content,layer)
-        scki = getTreeNodes(G, ck , lk);
+        scki = getTreeNodes(G, request.ck , request.lk);
         
         for v = scki'
             
@@ -32,28 +32,51 @@ function [ G, requestTable ] = new_lbsls( G, requestTableInput )
             [ path, delta_p, sigma_p ] = lowLatencyPathBetweenNodes( H, v, request.dk );
            
             % check if the path meets the delay and jitter requirements
-            if( (delta_p < ck_maximumLatency) &&  (sigma_p < ck_maximumJitter) )
+            if( (delta_p < request.maximumLatency) &&  (sigma_p < request.maximumJitter) )
                 P = [P path];
             end
                 
         end
         
-        % if we found nothing...
-        if( isempty(P) )
+        % we found more than one path
+        if( ~isempty(P) )
             
+            % select one path from P with the following priorities:
+            % 1. minimum latency. 
+            % 2. maximum avialabe bw. 
+            % 3. minimum hop count
+            % 4. random
+            path = lbslsMinLatencyMaxAvialableBW(G, P);
+          
+            % add found paths to request table                        
+            addToRequestTable(row, P, path);
+            
+            % update the relevant tree in G with p            
+            G = updateAvialableBW(G, treeIndex(ck, lk), path, ck_bw);
+
+        % we couldnt find any path
+        else
+
             % if BL could not be served
             if( layer == 0 )
+                
                 % try to remove EL's for this BL
                 
-                % if still empty, remove upper layers
+                % if we can remove EL for this BL - do it
+                
+                % if we couldnt find any EL that can help this BL -
+                % invalidate upper layers                              
+                
+            % if we couldnt serve EL - invalidate upper layers
             else
-                % remove upper layers
+                
+               
             end
             
          % P isn't empty   
         else
             
-            % choose the path with minimum latency
+
             
         end
             

@@ -21,18 +21,6 @@ end
 
 plotNetworkGraph( G );
 
-allPaths  = allPathsBetweenNodes( G, 9, 10 );
-
 simulation(G);
-
-
-
-
-%[requestTable] = buildRequestTable(G);  
-%[ LBSLS_G, LBSLS_requestTable ] = lbsls( G, requestTable);
-%r = revenue( LBSLS_requestTable );
-%save('LBSLS','LBSLS_G','LBSLS_requestTable');
-%simulation(G);
-%kcentrality(G);
 
 
