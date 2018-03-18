@@ -1,7 +1,0 @@
-function [ path, latency, jitter,  ] = lowLatencyPathBetweenNodes( input_args )
-%LOWLATENCYPATHBETWEENNODES Summary of this function goes here
-%   Detailed explanation goes here
-
-
-end
-

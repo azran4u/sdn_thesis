@@ -1,19 +1,15 @@
-function [ path ] = lbslsPathSelectionAlgorithm( G, paths )
+function [ path ] = lsPathSelectionAlgorithm( G, paths )
     % select one path from paths with the following priorities:
-    % 1. minimum latency. 
-    % 2. maximum avialabe bw. 
-    % 3. minimum hop count
-
-    % 4. random
+    % 1. maximum avialabe bw. 
+    % 2. minimum hop count
+    % 2. random
             
     table = pathsToTable( G, paths );
 
-    % find minimum latency
-    rows = table.latency==min(table.latency);      
+    % find maximum avialable bw
+    rows = table.availableBW==max(table.availableBW);      
     data = table(rows, :);
     table = data;
-    
-    % find maximum avialable bw
     
     % find minimum hop count
     rows = table.hopCount==min(table.hopCount);

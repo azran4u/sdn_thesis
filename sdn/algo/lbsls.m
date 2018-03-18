@@ -46,11 +46,7 @@ function [ G, requestTable ] = lbsls( G, requestTableInput )
         % we found more than one path
         if( ~isempty(P) )
             
-            % select one path from P with the following priorities:
-            % 1. minimum latency. 
-            % 2. maximum avialabe bw. 
-            % 3. minimum hop count
-            % 4. random
+            % select one path from P
             path = lbslsPathSelectionAlgorithm(H, P);
             
             % serve path
@@ -62,16 +58,39 @@ function [ G, requestTable ] = lbsls( G, requestTableInput )
             % if BL could not be served
             if( lk == 0 )
                 
-                % try to remove EL's for this BL
+                % find maximum bandwudth path in G
+                for v = scki'
+            
+                    % find shortest latency path in H
+                    [ path, delta_p, sigma_p ] = maxBWPathBetweenNodes( G, v, dk );
+
+                    % add latency and jitter fron v to source
+                    delta_p = delta_p + nodeLatencyInTree(G, v, ck, lk);
+                    sigma_p = sigma_p + nodeJitterInTree(G, v, ck, lk);
+
+                    % check if the path meets the delay and jitter requirements
+                    if( (delta_p < ck_maximumLatency) &&  (sigma_p < ck_maximumJitter) )           
+                        P = [P; {path}];
+                    end
+
+                end
                 
+                % we found more than one path
+                if( ~isempty(P) )
+            
+                    % select one path from P
+                    
+                    
+            
                 % if we can remove EL for this BL - do it and remove upper
                 % layers
                 
                 % if we couldnt find any EL that can help this BL -
                 % invalidate upper layers                              
                 
-            % if we couldnt serve EL - invalidate upper layers
+            % if we couldnt serve EL
             else
+                % invalidate upper layers
                             
             end                        
             
