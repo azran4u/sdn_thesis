@@ -58,10 +58,10 @@ function [ G, requestTable ] = lbsls( G, requestTableInput )
             % if BL could not be served
             if( lk == 0 )
                 
-                % find maximum bandwudth path in G
+                % find maximum bandwidth path in G
                 for v = scki'
             
-                    % find shortest latency path in H
+                    % find shortest latency path in G (original network)
                     [ path, delta_p, sigma_p ] = maxBWPathBetweenNodes( G, v, dk );
 
                     % add latency and jitter fron v to source

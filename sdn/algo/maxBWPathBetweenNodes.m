@@ -2,7 +2,7 @@ function [ path, delta_p, sigma_p ] = maxBWPathBetweenNodes( G, source, destinat
 
     paths = allPathsBetweenNodes( G, source, destination );
 
-    path = lsPathSelectionAlgorithm( G, paths );
+    path = lsPathSelectionAlgorithm( paths );
     
     delta_p = pathLatency(G, path);
     

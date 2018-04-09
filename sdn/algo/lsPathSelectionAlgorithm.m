@@ -1,11 +1,17 @@
-function [ path ] = lsPathSelectionAlgorithm( G, paths )
+function [ path ] = lsPathSelectionAlgorithm( paths )
     % select one path from paths with the following priorities:
     % 1. maximum avialabe bw. 
     % 2. minimum hop count
     % 2. random
             
-    table = pathsToTable( G, paths );
-
+    %table = pathsToTable( G, paths );
+    table = paths;
+    
+     % if paths is empty - return immidieatly
+    if( size(table,1) == 0 )
+        
+    end
+    
     % find maximum avialable bw
     rows = table.availableBW==max(table.availableBW);      
     data = table(rows, :);
