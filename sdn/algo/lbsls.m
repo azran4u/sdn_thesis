@@ -77,22 +77,25 @@ function [ G, requestTable ] = lbsls( G, requestTableInput )
                 
                 % we found more than one path
                 if( ~isempty(P) )
-            
+                           
+                    for k=1:length(P)
+                        path=P{k};
+                        requests = findInServiceELWeCanSwitchOutForBL(G,requestTable, path, ck_bw);
+                    end
                     % select one path from P
+                                                   
+                    % if we can remove EL for this BL - do it and remove upper
+                    % layers
+
+                    % if we couldnt find any EL that can help this BL -
+                    % invalidate upper layers                              
+
+                % if we couldnt serve EL
+                else
                     
-                    
-            
-                % if we can remove EL for this BL - do it and remove upper
-                % layers
-                
-                % if we couldnt find any EL that can help this BL -
-                % invalidate upper layers                              
-                
-            % if we couldnt serve EL
-            else
-                % invalidate upper layers
-                            
-            end                        
+                    % invalidate upper layers
+
+                end                        
             
         end
             

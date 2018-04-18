@@ -2,17 +2,17 @@
 function [ G ] = buildNetwork( )
 
     % network parameters
-    minNumOfRouters = 3;    
-    maxNumOfRouters = 5;
+    minNumOfRouters = 6;    
+    maxNumOfRouters = 6;
     minEdgeRoutersRatio = 2;
     maxEdgeRoutersRatio = 4;
     minBw = 2;
-    maxBw = 10;
+    maxBw = 5;
     minLatency = 5;
     maxLatency = 100;
     minJitter = 1;
     maxJitter = 5;
-    minNumOfSources = 1;
+    minNumOfSources = 3;
     contentSourceRatio = 1;
     rcvContentRatio = 2;
     contentMinAcceptedLatency = 500;
@@ -20,14 +20,14 @@ function [ G ] = buildNetwork( )
     contentMinAcceptedJitter = 500;
     contentMaxAcceptedJitter = 1000;
     maxLayer = 2; % Base layer (=0), Enhancement layer 1, Enhanacement layer 2.
-    baseLayerMaxBW = 2;
-    baseLayerMinBW = 0.5;
+    baseLayerMaxBW = 3;
+    baseLayerMinBW = 3;
     baseLayerIntervalBW = 0.25;
-    enhancementLayer1MaxBW = 3;
+    enhancementLayer1MaxBW = 2;
     enhancementLayer1MinBW = 1;
     enhancementLayer1IntervalBW = 0.25;
-    enhancementLayer2MaxBW = 3.5;
-    enhancementLayer2MinBW = 1.5;
+    enhancementLayer2MaxBW = 2;
+    enhancementLayer2MinBW = 0.5;
     enhancementLayer2IntervalBW = 0.25;
     numOfLayersPerContent = 3;
     
@@ -36,18 +36,24 @@ function [ G ] = buildNetwork( )
     edgeRoutersRatio = randi([minEdgeRoutersRatio maxEdgeRoutersRatio],1,1);
     
     % prevents multiple edges between same routers
-    if edgeRoutersRatio > numOfRouters
+    if ( edgeRoutersRatio >= numOfRouters)
         edgeRoutersRatio = numOfRouters-1;
     end
     
     numOfEdges = numOfRouters * edgeRoutersRatio;
    
+    % input validation
+    if( edgeRoutersRatio > numOfRouters )
+        disp(['BuildNetwork : Input Error. edgeRoutersRatio (', num2str(edgeRoutersRatio),') is greater than  numOfRouters (',num2str(numOfRouters),')']);
+    	exit;
+    end
+        
     % build edges
     s = [];
     t = [];
     for i=1:numOfRouters
         range = [1:numOfRouters];
-        range = range(range~=i);
+        range = range(range~=i);        
         links = randsample(range,edgeRoutersRatio);
         s = [s repmat(i,1,edgeRoutersRatio)];
         t = [t links];
@@ -124,8 +130,8 @@ function [ G ] = buildNetwork( )
     % each reciever is connected to one router. same router may serve
     % multiple recievers
     routerNodes = find(strcmp('router',G.Nodes.types));
-    lastHopRouetrs = randsample(routerNodes,numOfRcv, true)';
-    s = [lastHopRouetrs];    
+    lastHopRoueters = randsample(routerNodes,numOfRcv, true)';
+    s = [lastHopRoueters];    
     t = [numnodes(G)+1:numnodes(G)+numOfRcv];
    
     % set links properties
@@ -142,12 +148,17 @@ function [ G ] = buildNetwork( )
     types(:) = {'reciever'};
     G.Nodes.types(t) = types;
 
-    % add for each reciever the priority (Gold=1, Silver=2, Bronze = 3) 
+    % add for each reciever the priority (Gold=1, Silver=2, Bronze = 3, NA=0) 
     numOfNodes = size(G.Nodes,1);    
     recieverPriority = zeros(numOfNodes,1);
     recieverNodes = find(strcmp('reciever',G.Nodes.types));
-    recieverPriority(recieverNodes) = randsample([1:1:3],numOfRcv, true);
+    %recieverPriority(recieverNodes) = randsample([1:1:3],numOfRcv, true);
+    %G.Nodes.recieverPriority = recieverPriority;
+       
+    s = RandStream.getGlobalStream;
+    recieverPriority(recieverNodes) = datasample(s,[0:1:3],numOfRcv,'Weights',[0.4 0.2 0.2 0.2]);
     G.Nodes.recieverPriority = recieverPriority;
+
     
     % add for each reciever the requested content (only one) 
     requestedContent = zeros(numOfNodes,1);
@@ -156,14 +167,11 @@ function [ G ] = buildNetwork( )
     % handel the case which contentNodes is only one integer
     requestedContent(recieverNodes) = contentNodes(randsample(length(contentNodes),numOfRcv, true));
     
-    % old - not needed
-    %requestedContent(recieverNodes) = randsample(contentNodes,numOfRcv, true);
-    
     G.Nodes.requestedContent = requestedContent;
     
     % add for each reciever the requested layer (max)
     requestedLayer = zeros(numOfNodes,1);
-    requestedLayer(recieverNodes) = randsample([0:maxLayer],numOfRcv, true);
+    requestedLayer(recieverNodes) = randsample([0:maxLayer],numOfRcv, true);    
     G.Nodes.requestedLayer = requestedLayer;
 
     % add for each content it's priority (Critical=1, Regular=2, Low = 3) 

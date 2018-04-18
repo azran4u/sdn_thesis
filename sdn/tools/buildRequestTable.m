@@ -1,24 +1,26 @@
-function [T] = buildRequestTable(G)
+function [requestTableOut] = buildRequestTable(G, requestTableIn)
     
     % create all requests and store them in a table format
-    T = cell2table(cell(0,14), 'VariableNames', {
-        'reciever', 
-        'recieverPriority', 
-        'content', 
-        'contentPriority', 
-        'layer', 
-        'valid', 
-        'bw', 
-        'duration', 
-        'allPathsFound', 
-        'allPathsFoundLatencies', 
-        'allPathsFoundJitters', 
-        'selectedPath', 
-        'selectedPathLatency', 
-        'selectedPathJitter'});
+%     T = cell2table(cell(0,14), 'VariableNames', {
+%         'reciever', 
+%         'recieverPriority', 
+%         'content', 
+%         'contentPriority', 
+%         'layer', 
+%         'valid', 
+%         'bw', 
+%         'duration', 
+%         'allPathsFound', 
+%         'allPathsFoundLatencies', 
+%         'allPathsFoundJitters', 
+%         'selectedPath', 
+%         'selectedPathLatency', 
+%         'selectedPathJitter'});
 
-    % find all recierver nodes
-    recieverNodes = find(strcmp('reciever',G.Nodes.types));
+    % find all recierver nodes with priority > 0
+    table = find(strcmp('reciever',G.Nodes.types));
+    vaildRecieversIndices = G.Nodes.recieverPriority(table)>0;
+    recieverNodes = table(vaildRecieversIndices);    
     numOfRcv = size(recieverNodes, 1);
     
     % set default values
@@ -38,6 +40,10 @@ function [T] = buildRequestTable(G)
         rcvPriority = G.Nodes.recieverPriority(dk); % the client priority, set by network admin not by client. higher priority is better
         maxLayer = G.Nodes.requestedLayer(dk); % the client sets the sufficient layer. above layers won't be delieverd even if there are available resources.
         
+        if( rcvPriority == 0 ) 
+            continue;
+        end
+        
         % for each layer, starting from BASE to max - build a seperate request
         for lk = [0:1:maxLayer]
             
@@ -53,8 +59,10 @@ function [T] = buildRequestTable(G)
             % add request to table
             
             rcvCell = {dk, rcvPriority, ck, ck_priority, lk, valid, ck_bw, duration, allPathsFound, allPathsFoundLatencies, allPathsFoundJitters, selectedPath, selectedPathLatency, selectedPathJitter};
-            T = [T ; rcvCell];
+            requestTableIn = [requestTableIn ; rcvCell];
             
         end
     end
+    
+    requestTableOut = requestTableIn;
 end

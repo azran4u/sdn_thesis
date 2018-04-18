@@ -9,7 +9,8 @@ function [ path ] = lsPathSelectionAlgorithm( paths )
     
      % if paths is empty - return immidieatly
     if( size(table,1) == 0 )
-        
+        path = [];
+        return;
     end
     
     % find maximum avialable bw

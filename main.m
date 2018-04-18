@@ -8,9 +8,9 @@ addpath(genpath('sdn'));
 setGlobal_numOfLayersPerContent(3);
 setGlobal_decodableLatencyThreshold(30);
 
-test = 1;
+test = 0;
 
-if(test == 0)
+if(test == 1)
     [G] = buildNetwork();  
     firstContent = getGlobal_firstContent();
     save('network','G', 'firstContent');
