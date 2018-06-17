@@ -1,6 +1,7 @@
 function [ totalRunTime ] = gridSimulation( )
 
-    gridSize = [4,8,16,32,64,128,256];        
+    gridSize = [4,8];        
+    %gridSize = [4,8,16,32,64,128,256];        
     rep = 10;
 
     totalRunTime = [];
