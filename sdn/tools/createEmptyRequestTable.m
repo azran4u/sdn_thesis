@@ -1,7 +1,7 @@
 function [T] = createEmptyRequestTable()
     
     % create all requests and store them in a table format
-    T = cell2table(cell(0,14), 'VariableNames', {
+    T = cell2table(cell(0,15), 'VariableNames', {
         'reciever', 
         'recieverPriority', 
         'content', 
@@ -15,6 +15,7 @@ function [T] = createEmptyRequestTable()
         'allPathsFoundJitters', 
         'selectedPath', 
         'selectedPathLatency', 
-        'selectedPathJitter'});
+        'selectedPathJitter',
+        'revenue'});
 
 end

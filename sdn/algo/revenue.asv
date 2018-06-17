@@ -1,4 +1,4 @@
-function [ revenue, requestTable ] = revenue( requestTable )
+function [ revenue ] = revenue( requestTable )
     
     revenue = 0;
 
@@ -18,7 +18,7 @@ function [ revenue, requestTable ] = revenue( requestTable )
         % if request is served
         if( latency > 0 )
             requestRevenue = calcRequestRevenue(recieverPriority, contentPriority, duration, layer);
-            requestTable.revenue(row) = requestRevenue;
+            
             revenue = revenue + requestRevenue;
         end
         

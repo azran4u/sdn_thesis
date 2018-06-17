@@ -15,7 +15,8 @@ function [requestTableOut] = buildRequestTable(G, requestTableIn)
 %         'allPathsFoundJitters', 
 %         'selectedPath', 
 %         'selectedPathLatency', 
-%         'selectedPathJitter'});
+%         'selectedPathJitter',
+%          'revenue'});
 
     % find all recierver nodes with priority > 0
     table = find(strcmp('reciever',G.Nodes.types));
@@ -32,6 +33,7 @@ function [requestTableOut] = buildRequestTable(G, requestTableIn)
     selectedPath = []; % the selected path
     selectedPathLatency = 0; % the selected path latency
     selectedPathJitter = 0; % the selected path jitter
+    revenue = 0;
     
     % run over each reciever node and read request parameters
     for dk = recieverNodes' % 'd' for destination, 'k' for request number
@@ -56,9 +58,8 @@ function [requestTableOut] = buildRequestTable(G, requestTableIn)
                 ck_bw = G.Nodes.enhancementLayer2BW(ck);
             end
                          
-            % add request to table
-            
-            rcvCell = {dk, rcvPriority, ck, ck_priority, lk, valid, ck_bw, duration, allPathsFound, allPathsFoundLatencies, allPathsFoundJitters, selectedPath, selectedPathLatency, selectedPathJitter};
+            % add request to table            
+            rcvCell = {dk, rcvPriority, ck, ck_priority, lk, valid, ck_bw, duration, allPathsFound, allPathsFoundLatencies, allPathsFoundJitters, selectedPath, selectedPathLatency, selectedPathJitter, revenue};
             requestTableIn = [requestTableIn ; rcvCell];
             
         end

@@ -1,5 +1,6 @@
 function [ requests ] = findInServiceELWeCanSwitchOutForBL( G,requestTable, path, pathBW )
 
+    return;
     % find all served EL's
     query = requestTable.layer>0 & requestTable.selectedPathLatency~=0;
     ElServed = requestTable(query,:);

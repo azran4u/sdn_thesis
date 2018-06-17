@@ -1,7 +1,8 @@
 % implementation of LBSLS algorithm
-function [ G, requestTable, runTime ] = lbsls( G, requestTableInput )
+function [ G, requestTable ] = lbsls( G, requestTableInput )
+
     % store start time
-    tic
+    startTime = now;
     
     % read request table
     requestTable = requestTableInput;
@@ -88,9 +89,7 @@ function [ G, requestTable, runTime ] = lbsls( G, requestTableInput )
         indices(indices==0) = [];
         requestTable.valid(indices) = 1;
   
-        
-    end
-
-    % calc run time in [s]        
-    runTime=toc;
+        % calc run time
+        startTime = now;
 end
+

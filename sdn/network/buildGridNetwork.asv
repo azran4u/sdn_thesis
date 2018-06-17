@@ -1,18 +1,61 @@
-% build network by parameters
-function [ G ] = buildNetwork( )
+function [ G ] = buildGridNetwork( )
 
-    % network parameters
-    minNumOfRouters = 10;    
-    maxNumOfRouters = 10;
-    minEdgeRoutersRatio = 2;
-    maxEdgeRoutersRatio = 4;
+    N = 8;
+    
+    A = zeros(N);
+    
+    for i = 1:size(A,1)
+        for j = 1:size(A,2)
+            A(i,j) = N*(i-1)+j;
+        end
+    end
+    
+    s = [];
+    t = [];
+    
+    for i = 1:size(A,1)
+        for j = 1:size(A,2)
+            
+            % up
+            if( i > 1 )
+                s = [s A(i,j)];
+                t = [t A(i-1,j)];
+            end
+            
+            % down
+            if( i < N )
+                s = [s A(i,j)];
+                t = [t A(i+1,j)];
+            end
+            
+            % left
+            if( j > 1)
+                s = [s A(i,j)];
+                t = [t A(i,j-1)];
+            end
+            
+            % right
+            if( j < N)
+                s = [s A(i,j)];
+                t = [t A(i,j+1)];
+            end
+            
+        end
+    end
+    
+    %*********** network parameters*************
+    minNumOfRouters = N*N;    
+    maxNumOfRouters = N*N;
+    %minEdgeRoutersRatio = 2;
+    %maxEdgeRoutersRatio = 4;
     minBw = 3;
     maxBw = 10;
     minLatency = 5;
     maxLatency = 50;
     minJitter = 1;
     maxJitter = 5;
-    minNumOfSources = 5;
+    minNumOfSources = 2;
+    maxNumOfSources = min(minNumOfRouters, 2);
     contentSourceRatio = 1;
     rcvContentRatio = 2;
     contentMinAcceptedLatency = 500;
@@ -30,34 +73,12 @@ function [ G ] = buildNetwork( )
     enhancementLayer2MinBW = 1;
     enhancementLayer2IntervalBW = 0.5;
     numOfLayersPerContent = 3;
-    
-    % number of routers
-    numOfRouters = randi([minNumOfRouters maxNumOfRouters],1,1);  
-    edgeRoutersRatio = randi([minEdgeRoutersRatio maxEdgeRoutersRatio],1,1);
-    
-    % prevents multiple edges between same routers
-    if ( edgeRoutersRatio >= numOfRouters)
-        edgeRoutersRatio = numOfRouters-1;
-    end
-    
-    numOfEdges = numOfRouters * edgeRoutersRatio;
    
-    % input validation
-    if( edgeRoutersRatio > numOfRouters )
-        disp(['BuildNetwork : Input Error. edgeRoutersRatio (', num2str(edgeRoutersRatio),') is greater than  numOfRouters (',num2str(numOfRouters),')']);
-    	exit;
-    end
-        
-    % build edges
-    s = [];
-    t = [];
-    for i=1:numOfRouters
-        range = [1:numOfRouters];
-        range = range(range~=i);        
-        links = randsample(range,edgeRoutersRatio);
-        s = [s repmat(i,1,edgeRoutersRatio)];
-        t = [t links];
-    end
+    % ******** add routers and links *****************
+    
+    % number of routers and links
+    numOfRouters = randi([minNumOfRouters maxNumOfRouters],1,1);  
+    numOfEdges = size(s,2);
    
     bw = randi([1 maxBw],1,numOfEdges)';
     latency = randi([1 maxLatency],1,numOfEdges)';
@@ -72,13 +93,9 @@ function [ G ] = buildNetwork( )
     types = cell(numOfRouters,1);
     types(:) = {'router'};
     G.Nodes.types = types;
-    
+            
     % ******** add sources *****************
-    maxNumOfSources = numOfRouters;
     numOfSources = randi([minNumOfSources,maxNumOfSources],1,1);
-    
-    %maxNumOfSources = min(minNumOfSources,maxNumOfRouters);
-    %numOfSources = 1+round(rand(1)*maxNumOfSources);
         
     % each source is connected to one router only. same router may serve
     % multiple sources
@@ -100,6 +117,21 @@ function [ G ] = buildNetwork( )
     types = cell( numOfSources ,1);
     types(:) = {'source'};
     G.Nodes.types((numOfRouters+1):(numOfRouters+numOfSources)) = types;
+    
+end
+
+%********************************************
+
+
+
+    
+    
+
+   
+    
+    
+    % ******** add sources *****************
+    
     
     % ********** add contents **************
     sourceNodes = find(strcmp('source',G.Nodes.types));
@@ -238,7 +270,9 @@ function [ G ] = buildNetwork( )
         
     end
     
-end
+
+
+
 
 
 
