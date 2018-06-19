@@ -1,4 +1,4 @@
-function [ G ] = buildGridNetwork(N)
+function [ G ] = buildGridNetwork(N, numOfRcv)
     
     A = zeros(N);
     
@@ -52,8 +52,8 @@ function [ G ] = buildGridNetwork(N)
     maxLatency = 50;
     minJitter = 1;
     maxJitter = 5;
-    minNumOfSources = minNumOfRouters-1;
-    maxNumOfSources = min(minNumOfRouters, minNumOfRouters-1);
+    minNumOfSources = 1;
+    maxNumOfSources = 1;
     contentSourceRatio = 1;
     rcvContentRatio = 1;
     contentMinAcceptedLatency = 500;
@@ -143,7 +143,7 @@ function [ G ] = buildGridNetwork(N)
     % ************** add recivers *****************    
     contentNodes = find(strcmp('content',G.Nodes.types));
     numOfContents = size(contentNodes, 1);
-    numOfRcv = numOfContents * rcvContentRatio;
+    %numOfRcv = numOfContents * rcvContentRatio;
     
     % each reciever is connected to one router. same router may serve
     % multiple recievers
@@ -174,7 +174,7 @@ function [ G ] = buildGridNetwork(N)
     %G.Nodes.recieverPriority = recieverPriority;
        
     s = RandStream.getGlobalStream;
-    recieverPriority(recieverNodes) = datasample(s,[0:1:3],numOfRcv,'Weights',[0.4 0.2 0.2 0.2]);
+    recieverPriority(recieverNodes) = datasample(s,[1:1:3],numOfRcv,'Weights',[1/3 1/3 1/3]);
     G.Nodes.recieverPriority = recieverPriority;
 
     

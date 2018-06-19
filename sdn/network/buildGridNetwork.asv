@@ -1,6 +1,4 @@
-function [ G ] = buildGridNetwork( )
-
-    N = 8;
+function [ G ] = buildGridNetwork(N, numOfRcv)
     
     A = zeros(N);
     
@@ -54,10 +52,10 @@ function [ G ] = buildGridNetwork( )
     maxLatency = 50;
     minJitter = 1;
     maxJitter = 5;
-    minNumOfSources = 2;
-    maxNumOfSources = min(minNumOfRouters, 2);
+    minNumOfSources = minNumOfRouters-1;
+    maxNumOfSources = min(minNumOfRouters, minNumOfRouters-1);
     contentSourceRatio = 1;
-    rcvContentRatio = 2;
+    rcvContentRatio = 1;
     contentMinAcceptedLatency = 500;
     contentMaxAcceptedLatency = 1000;
     contentMinAcceptedJitter = 500;
@@ -118,22 +116,7 @@ function [ G ] = buildGridNetwork( )
     types(:) = {'source'};
     G.Nodes.types((numOfRouters+1):(numOfRouters+numOfSources)) = types;
     
-end
-
-%********************************************
-
-
-
-    
-    
-
-   
-    
-    
-    % ******** add sources *****************
-    
-    
-    % ********** add contents **************
+        % ********** add contents **************
     sourceNodes = find(strcmp('source',G.Nodes.types));
     numOfSources = size(sourceNodes, 1);
     numOfContents = numOfSources * contentSourceRatio;
@@ -269,6 +252,19 @@ end
         end
         
     end
+    
+end
+
+
+
+
+    
+    
+
+   
+    
+    
+
     
 
 

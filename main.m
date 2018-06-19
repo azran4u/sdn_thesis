@@ -21,13 +21,12 @@ if(test == 1)
 end
 
 if(test == 2)
-    [ totalRunTime ] = gridSimulation( )
+    [ totalRunTime ] = gridSimulation( );
+    totalRunTime
+    return;
 end
 
-return;
-
 plotNetworkGraph( G );
-
 simulation(G);
 
 
