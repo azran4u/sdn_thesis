@@ -1,7 +1,7 @@
 % implementation of LBSLS algorithm
 function [ G, requestTable, runTime ] = lbsls( G, requestTableInput )
-    % store start time
-    tic
+   
+    runTime = 0;
     
     % read request table
     requestTable = requestTableInput;
@@ -11,6 +11,8 @@ function [ G, requestTable, runTime ] = lbsls( G, requestTableInput )
      
     % run over all requests, base layer first, EL1 second, and so on.
     for row = 1:height(requestTable)
+         % store start time
+        tic
         
         [dk,ck,lk,valid,ck_bw,ck_maximumLatency,ck_maximumJitter] = readRequestParameters(G, requestTable , row);                                       
         
@@ -41,12 +43,12 @@ function [ G, requestTable, runTime ] = lbsls( G, requestTableInput )
             [ path, delta_p, sigma_p ] = lowLatencyPathBetweenNodes( H, v, dk );
         
             % add latency and jitter fron v to source
-            delta_p = delta_p + nodeLatencyInTree(H, v, ck, lk);
-            sigma_p = sigma_p + nodeJitterInTree(H, v, ck, lk);
+            totalDeltaP = delta_p + nodeLatencyInTree(H, v, ck, lk);
+            totalSigmaP = sigma_p + nodeJitterInTree(H, v, ck, lk);
             
             % check if the path meets the delay and jitter requirements
-            if( (delta_p < ck_maximumLatency) &&  (sigma_p < ck_maximumJitter) )           
-                P = [P; {path}];
+            if( (totalDeltaP < ck_maximumLatency) &&  (totalSigmaP < ck_maximumJitter) )           
+                P = [P; {path} delta_p sigma_p];
             end
                 
         end
@@ -56,14 +58,11 @@ function [ G, requestTable, runTime ] = lbsls( G, requestTableInput )
             
             % select one path from P
             path = lbslsPathSelectionAlgorithm(H, P);
-            
-            if( lk > 0 )
-                a=1;
-            end
-            
+                   
             % serve path
-            [G, requestTable] = servePath(requestTable, row, G, P, path, ck, lk, ck_bw);
-            
+            [newG, newRequestTable] = servePath(requestTable, row, G, P(:,1), path, ck, lk, ck_bw);
+            G = newG;
+            requestTable = newRequestTable;
         % we couldnt find any path
         else
 
@@ -88,9 +87,13 @@ function [ G, requestTable, runTime ] = lbsls( G, requestTableInput )
         indices(indices==0) = [];
         requestTable.valid(indices) = 1;
   
-        
+        % calc run time in [s]        
+        requestRunTime=toc;
+        runTime = runTime + requestRunTime;
+        msg = ['LBSLS: ck= ', num2str(ck), ' lk= ', num2str(lk), ' dk= ', num2str(dk), ' sckiSize= ', num2str(size(scki,1)), ' Psize= ', num2str(size(P,1)), ' requestRunTime= ', num2str(requestRunTime)];
+        disp(msg);
+                
     end
 
-    % calc run time in [s]        
-    runTime=toc;
+    
 end

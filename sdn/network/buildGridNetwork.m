@@ -1,4 +1,4 @@
-function [ G ] = buildGridNetwork(N, numOfRcv)
+function [ G ] = buildGridNetwork(N, InputNumOfRcv)
     
     A = zeros(N);
     
@@ -46,41 +46,45 @@ function [ G ] = buildGridNetwork(N, numOfRcv)
     maxNumOfRouters = N*N;
     %minEdgeRoutersRatio = 2;
     %maxEdgeRoutersRatio = 4;
-    minBw = 3;
-    maxBw = 10;
-    minLatency = 5;
-    maxLatency = 50;
-    minJitter = 1;
-    maxJitter = 5;
-    minNumOfSources = 1;
-    maxNumOfSources = 1;
-    contentSourceRatio = 1;
-    rcvContentRatio = 1;
-    contentMinAcceptedLatency = 500;
-    contentMaxAcceptedLatency = 1000;
-    contentMinAcceptedJitter = 500;
-    contentMaxAcceptedJitter = 1000;
-    maxLayer = 2; % Base layer (=0), Enhancement layer 1, Enhanacement layer 2.
-    baseLayerMaxBW = 2;
-    baseLayerMinBW = 2;
-    baseLayerIntervalBW = 0.5;
-    enhancementLayer1MaxBW = 1;
-    enhancementLayer1MinBW = 1;
-    enhancementLayer1IntervalBW = 0.5;
+    minBw = 4;
+    maxBw = 4;
+    minLatency = 1;
+    maxLatency = 1;
+    minJitter = 0;
+    maxJitter = 0;
+    minNumOfSources = 3;
+    maxNumOfSources = 3;
+    minNumOfRcvs = InputNumOfRcv;
+    maxNumOfRcvs = InputNumOfRcv;
+    numOfActiveRcvs = InputNumOfRcv;
+    contentSourceRatio = 4/3;
+    rcvContentRatio = 2;
+    contentMinAcceptedLatency = 10;
+    contentMaxAcceptedLatency = 10;
+    contentMinAcceptedJitter = 3;
+    contentMaxAcceptedJitter = 3;
+    baseLayerMaxBW = 1;
+    baseLayerMinBW = 1;
+    baseLayerIntervalBW = 1;
+    enhancementLayer1MaxBW = 3;
+    enhancementLayer1MinBW = 3;
+    enhancementLayer1IntervalBW = 1;
     enhancementLayer2MaxBW = 1;
     enhancementLayer2MinBW = 1;
-    enhancementLayer2IntervalBW = 0.5;
-    numOfLayersPerContent = 3;
-   
+    enhancementLayer2IntervalBW = 1;
+    numOfTotalLayersPerContent = getGlobal_numOfLayersPerContent()-1; % Base layer (=0), Enhancement layer 1 (=1), Enhanacement layer 2 (=2).
+    numOfActiveLayersPerContent = 1; % layers for rcv's
+    
+    
     % ******** add routers and links *****************
     
     % number of routers and links
     numOfRouters = randi([minNumOfRouters maxNumOfRouters],1,1);  
     numOfEdges = size(s,2);
    
-    bw = randi([1 maxBw],1,numOfEdges)';
-    latency = randi([1 maxLatency],1,numOfEdges)';
-    jitter = randi([1 maxJitter],1,numOfEdges)';
+    bw = randi([minBw maxBw],1,numOfEdges)';
+    latency = randi([minLatency maxLatency],1,numOfEdges)';
+    jitter = randi([minJitter maxJitter],1,numOfEdges)';
             
     EdgeTable = table([s' t'], bw, latency, jitter, 'VariableNames',{'EndNodes' 'bw' 'latency' 'jitter'});
    
@@ -103,9 +107,9 @@ function [ G ] = buildGridNetwork(N, numOfRcv)
     t = [firstHopRouetrs];
     
     % set links properties
-    bw = randi([1 maxBw],1,numOfSources)';
-    latency = randi([1 maxLatency],1,numOfSources)';
-    jitter = randi([1 maxJitter],1,numOfSources)';
+    bw = randi([minBw maxBw],1,numOfSources)';
+    latency = randi([minLatency maxLatency],1,numOfSources)';
+    jitter = randi([minJitter maxJitter],1,numOfSources)';
             
     % add to graph
     EdgeTable = table([s' t'], bw, latency, jitter, 'VariableNames',{'EndNodes' 'bw' 'latency' 'jitter'});
@@ -121,9 +125,10 @@ function [ G ] = buildGridNetwork(N, numOfRcv)
     numOfSources = size(sourceNodes, 1);
     numOfContents = numOfSources * contentSourceRatio;
     
-    % create t vector with each source multiple tymes (= as
+    % create t vector with each source multiple times (= as
     % contentSourceRatio)
-    t = repmat(sourceNodes, contentSourceRatio, 1)';
+    %t = repmat(sourceNodes, contentSourceRatio, 1)';
+    t = randsample(sourceNodes,numOfContents, true)';
     s = [numnodes(G)+1:numnodes(G)+numOfContents];
     
     % set links properties
@@ -143,19 +148,21 @@ function [ G ] = buildGridNetwork(N, numOfRcv)
     % ************** add recivers *****************    
     contentNodes = find(strcmp('content',G.Nodes.types));
     numOfContents = size(contentNodes, 1);
+    numOfRcv = randi([minNumOfRcvs,maxNumOfRcvs],1,1);
+    %numOfRcv = InputNumOfRcv;
     %numOfRcv = numOfContents * rcvContentRatio;
     
     % each reciever is connected to one router. same router may serve
     % multiple recievers
     routerNodes = find(strcmp('router',G.Nodes.types));
-    lastHopRoueters = randsample(routerNodes,numOfRcv, true)';
-    s = [lastHopRoueters];    
+    lastHopRouters = randsample(routerNodes,numOfRcv, false)';
+    s = [lastHopRouters];    
     t = [numnodes(G)+1:numnodes(G)+numOfRcv];
    
-    % set links properties
-    bw = randi([1 maxBw],1,numOfRcv)';
-    latency = randi([1 maxLatency],1,numOfRcv)';
-    jitter = randi([1 maxJitter],1,numOfRcv)';
+    % set links properties    
+    bw = repmat([inf], numOfRcv, 1);
+    latency = repmat([0], numOfRcv, 1);
+    jitter = repmat([0], numOfRcv, 1);
     
     % add to graph
     EdgeTable = table([s' t'], bw, latency, jitter, 'VariableNames',{'EndNodes' 'bw' 'latency' 'jitter'});
@@ -174,7 +181,9 @@ function [ G ] = buildGridNetwork(N, numOfRcv)
     %G.Nodes.recieverPriority = recieverPriority;
        
     s = RandStream.getGlobalStream;
-    recieverPriority(recieverNodes) = datasample(s,[1:1:3],numOfRcv,'Weights',[1/3 1/3 1/3]);
+    activeRcvs = randsample(recieverNodes,numOfActiveRcvs, false)';
+    recieverPriority(activeRcvs) = 1;
+    %recieverPriority(recieverNodes) = datasample(s,[1:1:3],numOfRcv,'Weights',[1/3 1/3 1/3]);
     G.Nodes.recieverPriority = recieverPriority;
 
     
@@ -189,7 +198,7 @@ function [ G ] = buildGridNetwork(N, numOfRcv)
     
     % add for each reciever the requested layer (max)
     requestedLayer = zeros(numOfNodes,1);
-    requestedLayer(recieverNodes) = randsample([0:maxLayer],numOfRcv, true);    
+    requestedLayer(recieverNodes) = repmat([numOfActiveLayersPerContent], numOfRcv, 1);   
     G.Nodes.requestedLayer = requestedLayer;
 
     % add for each content it's priority (Critical=1, Regular=2, Low = 3) 
@@ -200,14 +209,16 @@ function [ G ] = buildGridNetwork(N, numOfRcv)
     
     % add for each content it's maximum accepted latency
     contentMaximumLatency = zeros(numOfNodes,1);
-    contentNodes = find(strcmp('content',G.Nodes.types));
-    contentMaximumLatency(contentNodes) = randsample([contentMinAcceptedLatency:1:contentMaxAcceptedLatency],numOfContents, true);
+    contentNodes = find(strcmp('content',G.Nodes.types));   
+    contentMaximumLatency(contentNodes) = repmat([contentMaxAcceptedLatency], numOfContents, 1);  
+    %contentMaximumLatency(contentNodes) = randsample([contentMinAcceptedLatency:1:contentMaxAcceptedLatency],contentMaxAcceptedLatency, true);
     G.Nodes.contentMaximumLatency = contentMaximumLatency;
 
     % add for each content it's maximum accepted jitter
     contentMaximumJitter = zeros(numOfNodes,1);
-    contentNodes = find(strcmp('content',G.Nodes.types));
-    contentMaximumJitter(contentNodes) = randsample([contentMinAcceptedJitter:1:contentMaxAcceptedJitter],numOfContents, true);
+    contentNodes = find(strcmp('content',G.Nodes.types));    
+    contentMaximumJitter(contentNodes) = repmat([contentMaxAcceptedJitter], numOfContents, 1);  
+    %contentMaximumJitter(contentNodes) = randsample([contentMinAcceptedJitter:1:contentMaxAcceptedJitter],numOfContents, true);
     G.Nodes.contentMaximumJitter = contentMaximumJitter;    
     
     % add for each content the desired bw for base layer 
@@ -229,9 +240,9 @@ function [ G ] = buildGridNetwork(N, numOfRcv)
     G.Nodes.enhancementLayer2BW = enhancementLayer2BW;
    
     % create new field for each node and edge that represents the usage of the graph element in the tree (content, layer)
-    G.Nodes.treeLatency = ones(G.numnodes,numOfContents*numOfLayersPerContent)*inf;
-    G.Nodes.treeJitter = ones(G.numnodes,numOfContents*numOfLayersPerContent)*inf;
-    G.Edges.treeUsed = ones(G.numedges,numOfContents*numOfLayersPerContent)*inf;
+    G.Nodes.treeLatency = ones(G.numnodes,numOfContents*getGlobal_numOfLayersPerContent())*inf;
+    G.Nodes.treeJitter = ones(G.numnodes,numOfContents*getGlobal_numOfLayersPerContent())*inf;
+    G.Edges.treeUsed = ones(G.numedges,numOfContents*getGlobal_numOfLayersPerContent())*inf;
     
     % build distribution tree for each (content,layer) pair
      setGlobal_firstContent( contentNodes(1) );
@@ -240,7 +251,7 @@ function [ G ] = buildGridNetwork(N, numOfRcv)
     for content = contentNodes'
      
         % run over each layer
-        for layer = 0:(getGlobal_numOfLayersPerContent() - 1)
+        for layer = 0:(numOfTotalLayersPerContent)
             
             % calculate the index of the (content, layer) tree
             index = treeIndex(content , layer);

@@ -7,11 +7,13 @@ function [ table ] = pathsToTable( G, paths )
         'availableBW', 
         'hopCount'});
     
-    for ii = 1:length(paths)
+    for ii = 1:size(paths,1)
         
-        path = paths{ii};
-        latency = pathLatency(G, path);
+        path = paths{ii, 1}; 
+        latency = pathLatency(G, path); 
         jitter = pathJitter(G, path);
+        %latency = paths{ii, 2}; % delta_p
+        %jitter = paths{ii, 3}; % sigma_p        
         availableBW = pathAvailableBW(G, path);
         hopCount = pathHopCount(G, path);
         

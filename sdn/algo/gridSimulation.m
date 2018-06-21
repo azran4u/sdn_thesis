@@ -1,9 +1,8 @@
 function [ totalRunTime ] = gridSimulation( )
 
-    gridSize = [3:1:3];        
-    numOfRcvRatio = [1/64:3/64:1];
-    %gridSize = [4,8,16,32,64,128,256];        
-    rep = 1;
+    gridSize = [2:1:2];      
+    numOfRcvArray = [4,5,6,7,8];
+    rep = 5;
 
     totalRunTime = [];
     for i=1:size(gridSize, 2)
@@ -11,9 +10,7 @@ function [ totalRunTime ] = gridSimulation( )
         N = 2^gridSize(i);
         
         rcvRunTime = [];
-        for j = 1:size(numOfRcvRatio, 2)
-                        
-            numOfRcv = ceil(N*N*numOfRcvRatio(j));
+        for numOfRcv = numOfRcvArray                                    
             
             % build grid network
             [G] = buildGridNetwork(N,numOfRcv);
@@ -28,8 +25,8 @@ function [ totalRunTime ] = gridSimulation( )
             for k = 1:rep
                 % run LBSLS
                 [ tempG, tempRequestTable, runTime ] = lbsls( G, requestTable );
-                repRunTime = [repRunTime runTime];
-                disp(['routers = ' , num2str(N*N), ' users =  ',  num2str(numOfRcv) , ' rep = ' , num2str(k)]);
+                disp(['routers = ' , num2str(N*N), ' users =  ',  num2str(numOfRcv) , ' rep = ' , num2str(k), ' runTime= ', num2str(runTime)]);
+                repRunTime = [repRunTime runTime];                
             end
 
             rcvRunTime = [rcvRunTime ; repRunTime];            

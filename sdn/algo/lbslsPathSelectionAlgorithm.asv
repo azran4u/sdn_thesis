@@ -7,13 +7,13 @@ function [ path ] = lbslsPathSelectionAlgorithm( G, paths)
     % 4. random
             
     P=paths(:,1);
-    delta_p=cell2mat(paths(:,2));
-    sigma_p=cell2mat(paths(:,3));
+    delta_p=paths(:,2);
+    sigma_p=paths(:,3);
     
     table = pathsToTable( G, P );
 
     % find minimum latency
-    %rows = table.latency==min(table.latency);   
+    rows = table.latency==min(table.latency);   
     rows = delta_p==min(delta_p);
     data = table(rows, :);
     table = data;
