@@ -1,6 +1,21 @@
 % implementation of LBSLS algorithm
-function [ G, requestTable, runTime ] = lbsls( G, requestTableInput )
+%function [ G, requestTable, runTime, details ] = lbsls( G, requestTableInput )
+function [ results ] = lbsls( G, requestTableInput )
    
+    results = cell2table(cell(0,4), 'VariableNames', {
+        'G', 
+        'requestTable', 
+        'runTime',
+        'details'});
+    
+    details = cell2table(cell(0,6), 'VariableNames', {
+        'ck', 
+        'lk', 
+        'dk',
+        'scki', 
+        'P',
+        'requestRunTime'});
+    
     runTime = 0;
     
     % read request table
@@ -90,10 +105,16 @@ function [ G, requestTable, runTime ] = lbsls( G, requestTableInput )
         % calc run time in [s]        
         requestRunTime=toc;
         runTime = runTime + requestRunTime;
-        msg = ['LBSLS: ck= ', num2str(ck), ' lk= ', num2str(lk), ' dk= ', num2str(dk), ' sckiSize= ', num2str(size(scki,1)), ' Psize= ', num2str(size(P,1)), ' requestRunTime= ', num2str(requestRunTime)];
-        disp(msg);
+        
+        detailsRow = {ck, lk, dk, size(scki,1), size(P,1), requestRunTime};
+        details = [details ; detailsRow];
+        
+        %msg = ['LBSLS: ck= ', num2str(ck), ' lk= ', num2str(lk), ' dk= ', num2str(dk), ' sckiSize= ', num2str(size(scki,1)), ' Psize= ', num2str(size(P,1)), ' requestRunTime= ', num2str(requestRunTime)];
+        %disp(msg);
                 
     end
 
+    resultsRow = {G, requestTable, runTime, details};
+    results = [results ; resultsRow];
     
 end

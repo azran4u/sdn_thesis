@@ -21,8 +21,8 @@ if(test == 1)
 end
 
 if(test == 2)
-    [ totalRunTime ] = gridSimulation( );
-    totalRunTime
+    %[ totalRunTime ] = gridSimulation( );
+    [ gridSimulationResults ] = gridSimulation( );
     return;
 end
 
