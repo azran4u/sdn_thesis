@@ -23,6 +23,7 @@ end
 if(test == 2)
     %[ totalRunTime ] = gridSimulation( );
     [ gridSimulationResults ] = gridSimulation( );
+    save(gridSimulationResults);
     return;
 end
 

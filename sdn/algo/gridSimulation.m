@@ -1,6 +1,6 @@
 function [ results ] = gridSimulation( )
 
-    gridSize = [2:1:5];      
+    gridSize = [2:1:8];      
     rep = 5;
 
     results = cell2table(cell(0,5), 'VariableNames', {
