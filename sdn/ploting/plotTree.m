@@ -51,15 +51,15 @@ function plotTree( G, requestTable, treeIndex )
     title(['#content = ', num2str(content) ' #layer = ', num2str(layer) ' #bw = ', num2str(bw) ' #requests = ', num2str(numOfRequests) ' #numOfRequestsProvided = ', num2str(numOfRequestsProvided)]);    
     
     % highlight tree's edges
-    edges = H.Edges.usedFor(:, treeIndex );
+    edges = H.Edges.treeUsed(:, treeIndex );
     edges = find(edges==1);
     s = H.Edges.EndNodes(edges,1);
     t = H.Edges.EndNodes(edges,2);
     highlight(h, s, t , 'EdgeColor','r');
     
     % highlight tree's nodes
-    nodes = H.Nodes.usedFor(:, treeIndex );
-    nodes = find(nodes == 1);
+    nodes = H.Nodes.treeLatency(:, treeIndex );
+    nodes = find(nodes < inf);
     highlight(h, nodes, 'NodeColor','r');
     
     % highlight tree's recievers that didn't get the content

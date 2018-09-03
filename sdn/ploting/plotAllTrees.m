@@ -1,11 +1,11 @@
 function plotAllTrees( G, requestTable )
 
     % read usedFor table of G
-    usedFor = G.Nodes.usedFor;
+    treeLatency = G.Nodes.treeLatency;
     
     % find valid trees
-    treeIndices = sum(usedFor,1);
-    treeIndices = find((treeIndices>1));
+    treeIndices = 1:size(treeLatency,2);
+    %treeIndices = find((treeIndices<inf));
     
     % plot each tree
     for treeIndex = treeIndices

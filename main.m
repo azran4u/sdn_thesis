@@ -22,8 +22,8 @@ end
 
 if(test == 2)
     %[ totalRunTime ] = gridSimulation( );
-    [ gridSimulationResults ] = gridSimulation( );
-    save(gridSimulationResults);
+    [ gridSimulationResults ] = LLVSgridSimulation( );
+    %save(gridSimulationResults);
     return;
 end
 

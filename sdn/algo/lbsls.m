@@ -58,8 +58,8 @@ function [ results ] = lbsls( G, requestTableInput )
             [ path, delta_p, sigma_p ] = lowLatencyPathBetweenNodes( H, v, dk );
         
             % add latency and jitter fron v to source
-            totalDeltaP = delta_p + nodeLatencyInTree(H, v, ck, lk);
-            totalSigmaP = sigma_p + nodeJitterInTree(H, v, ck, lk);
+            totalDeltaP = delta_p;% + nodeLatencyInTree(H, v, ck, lk);
+            totalSigmaP = sigma_p;% + nodeJitterInTree(H, v, ck, lk);
             
             % check if the path meets the delay and jitter requirements
             if( (totalDeltaP < ck_maximumLatency) &&  (totalSigmaP < ck_maximumJitter) )           

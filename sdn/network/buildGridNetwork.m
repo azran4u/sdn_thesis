@@ -177,14 +177,14 @@ function [ G ] = buildGridNetwork(N, InputNumOfRcv)
     numOfNodes = size(G.Nodes,1);    
     recieverPriority = zeros(numOfNodes,1);
     recieverNodes = find(strcmp('reciever',G.Nodes.types));
-    %recieverPriority(recieverNodes) = randsample([1:1:3],numOfRcv, true);
-    %G.Nodes.recieverPriority = recieverPriority;
-       
-    s = RandStream.getGlobalStream;
-    activeRcvs = randsample(recieverNodes,numOfActiveRcvs, false)';
-    recieverPriority(activeRcvs) = 1;
-    %recieverPriority(recieverNodes) = datasample(s,[1:1:3],numOfRcv,'Weights',[1/3 1/3 1/3]);
+    recieverPriority(recieverNodes) = randsample([1:1:3],numOfRcv, true);
     G.Nodes.recieverPriority = recieverPriority;
+       
+%     s = RandStream.getGlobalStream;
+%     activeRcvs = randsample(recieverNodes,numOfActiveRcvs, false)';
+%     recieverPriority(activeRcvs) = 1;
+%     %recieverPriority(recieverNodes) = datasample(s,[1:1:3],numOfRcv,'Weights',[1/3 1/3 1/3]);
+%     G.Nodes.recieverPriority = recieverPriority;
 
     
     % add for each reciever the requested content (only one) 
