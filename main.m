@@ -27,7 +27,12 @@ if(test == 2)
     return;
 end
 
-plotNetworkGraph( G );
-simulation(G);
+if( test == 3)
+    load('results/LLVS-LBSLS-Comparsion','results');
+    diagrams(results);
+end
+
+%plotNetworkGraph( G );
+%simulation(G);
 
 

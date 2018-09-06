@@ -1,26 +1,27 @@
 function [ results ] = LLVSgridSimulation( )
 
-    gridSize = [2:1:2];      
-    rep = 5;
+    gridSize = [2:1:8];      
+    rep = 3;
 
-    results = cell2table(cell(0,5), 'VariableNames', {
+    results = cell2table(cell(0,7), 'VariableNames', {
         'gridSize', 
         'numOfRcv', 
         'rep', 
-        'runTime',
-        'LBSLdetails'});
-
-    totalRunTime = [];
+        'LBSLSrunTime',
+        'LBSLSdetails',
+        'LLVSrunTime',
+        'LLVSdetails'});
+    
     for i=1:size(gridSize, 2)
         
         N = 2^gridSize(i);
         
         numOfRcvArray = [N].^2;
         %numOfRcvArray = [1, N/2, N].^2;
-        rcvRunTime = [];
+
         for numOfRcv = numOfRcvArray                                                
 
-            test = 1;
+            test = 0;
 
             if(test == 0)
                 % build grid network
@@ -40,32 +41,24 @@ function [ results ] = LLVSgridSimulation( )
             [requestTable] = createEmptyRequestTable();
             [tempRequestTable] = buildRequestTable(G, requestTable);  
             requestTable = tempRequestTable;
-
-            repRunTime = [];
+            
             for k = 1:rep
-                % run LBSLS
-                %[ tempG, tempRequestTable, runTime, LBSLSresults ] = lbsls( G, requestTable );
-                [ LBSLSresults ] = LLVS( G, requestTable );
-                runTime=LBSLSresults.runTime(1);
                 
-                %disp(['routers = ' , num2str(N*N), ' users =  ',  num2str(numOfRcv) , ' rep = ' , num2str(k), ' runTime= ', num2str(runTime)]);
+                [ LLVSresults ] = LLVS( G, requestTable );                                                
+                [ LBSLSresults ] = lbsls( G, requestTable );                                
                 
-                repRunTime = [repRunTime runTime];                
-                                
-                row = {N*N, numOfRcv, k, runTime, LBSLSresults};
+                row = {N*N, numOfRcv, k, LBSLSresults.runTime(1), LBSLSresults, LLVSresults.runTime(1), LLVSresults};
                 results = [results ; row];
+                                
+                msg = ['grid size = ', num2str(N*N), ' rcv# = ', num2str(numOfRcv), ' rep =', num2str(k)];
+                disp(msg);
                 
             end
-
-            msg = ['grid size = ', num2str(N*N), ' rcv# = ', num2str(numOfRcv)];
-            disp(msg);
-            
-            rcvRunTime = [rcvRunTime ; repRunTime];            
-        end
-        
-        totalRunTime = [totalRunTime ; rcvRunTime];
+                       
+        end        
         
     end
+    
 end
     
    

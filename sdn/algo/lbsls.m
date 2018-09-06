@@ -8,7 +8,8 @@ function [ results ] = lbsls( G, requestTableInput )
         'runTime',
         'details'});
     
-    details = cell2table(cell(0,6), 'VariableNames', {
+    details = cell2table(cell(0,7), 'VariableNames', {
+        'row',
         'ck', 
         'lk', 
         'dk',
@@ -106,7 +107,7 @@ function [ results ] = lbsls( G, requestTableInput )
         requestRunTime=toc;
         runTime = runTime + requestRunTime;
         
-        detailsRow = {ck, lk, dk, size(scki,1), size(P,1), requestRunTime};
+        detailsRow = {row, ck, lk, dk, size(scki,1), size(P,1), requestRunTime};
         details = [details ; detailsRow];
         
         %msg = ['LBSLS: ck= ', num2str(ck), ' lk= ', num2str(lk), ' dk= ', num2str(dk), ' sckiSize= ', num2str(size(scki,1)), ' Psize= ', num2str(size(P,1)), ' requestRunTime= ', num2str(requestRunTime)];

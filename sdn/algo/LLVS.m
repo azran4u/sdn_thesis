@@ -8,7 +8,8 @@ function [ results ] = LLVS( G, requestTableInput )
         'runTime',
         'details'});
     
-    details = cell2table(cell(0,4), 'VariableNames', {
+    details = cell2table(cell(0,5), 'VariableNames', {
+        'row',
         'ck', 
         'lk', 
         'dk',
@@ -76,12 +77,12 @@ function [ results ] = LLVS( G, requestTableInput )
         requestRunTime=toc;
         runTime = runTime + requestRunTime;
         
-        detailsRow = {ck, lk, dk, requestRunTime};
+        detailsRow = {row, ck, lk, dk, requestRunTime};
         details = [details ; detailsRow];
         
     end
 
     resultsRow = {G, requestTable, runTime, details};
     results = [results ; resultsRow];
-    plotAllTrees( G, requestTable );
+    %plotAllTrees( G, requestTable );
 end
