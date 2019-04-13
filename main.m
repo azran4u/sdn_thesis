@@ -7,7 +7,7 @@ addpath(genpath('sdn'));
 setGlobal_numOfLayersPerContent(3);
 setGlobal_decodableLatencyThreshold(30);
 
-test = 2;
+test = 3;
 
 if(test == 0)
     [G] = buildNetwork();  
@@ -23,6 +23,13 @@ end
 if(test == 2)
     %[ totalRunTime ] = gridSimulation( );
     [ gridSimulationResults ] = LLVSgridSimulation( );
+    %save(gridSimulationResults);
+    return;
+end
+
+if(test == 3)
+    [ totalRunTime ] = gridSimulation( );
+    %[ gridSimulationResults ] = LLVSgridSimulation( );
     %save(gridSimulationResults);
     return;
 end

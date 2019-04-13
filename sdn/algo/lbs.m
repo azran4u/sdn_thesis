@@ -1,117 +1,120 @@
-function [ G, requestTable ] = lbs( G )
-
-    % global variables - number of layers per content
-    setGlobal_numOfLayersPerContent(3);
-
-    % build request table
-    % columns - {reciever, content, layer, bw}
-    % go over all recievers and populate table
-    requestTable = buildRequestTable(G);
+% implementation of LBSLS algorithm
+%function [ G, requestTable, runTime, details ] = lbsls( G, requestTableInput )
+function [ results ] = lbs( G, requestTableInput )
+   
+    results = cell2table(cell(0,4), 'VariableNames', {
+        'G', 
+        'requestTable', 
+        'runTime',
+        'details'});
+    
+    details = cell2table(cell(0,6), 'VariableNames', {
+        'ck', 
+        'lk', 
+        'dk',
+        'scki', 
+        'P',
+        'requestRunTime'});
+    
+    runTime = 0;
+    
+    % read request table
+    requestTable = requestTableInput;
            
-    % sort table by layer, so we start to provide base layer, EL1, etc.
+    % sort requests by layer
     requestTable = sortrows(requestTable,{'layer'},{'ascend'});
-    
-    % matlab uses only 'Weight' variable as cost so we set it 
-    G.Edges.Weight = G.Edges.latency;
-    
+     
     % run over all requests, base layer first, EL1 second, and so on.
     for row = 1:height(requestTable)
+         % store start time
+        tic
         
-        % get request parameters
-        gama_k_i = requestTable(row, :);
-        dk = gama_k_i.reciever;
-        ck = gama_k_i.content;
-        lk = gama_k_i.layer;
-        valid = gama_k_i.valid;
-        ck_bw = gama_k_i.bw;
-                
-        % if the request isn't vaild (Eg. don't supply EL1 if BL is not)
+        [dk,ck,lk,valid,ck_bw,ck_maximumLatency,ck_maximumJitter] = readRequestParameters(G, requestTable , row);                                       
+        
+        % if the request isn't vaild skip it (Eg. don't supply EL1 if BL is not)
         if( valid ~= 1 )
             continue;
         end
         
-        % remove all edges that don't conform the bw requierment
+        % if request already served - skip it
+        selectedPathOfRow = requestTable.selectedPath(row);        
+        if(~isempty(selectedPathOfRow{1}))
+            continue;
+        end
+        
+        % P holds all possible paths
+        P = cell(0);
+        %P = [];
+        
+        % remove edges that don't meet the bandwidth requiremnt
         H = removeEdgesBelow( G, ck_bw );
-           
-        % P holds all paths we find, delta_P holds the corresponding
-        % latencies
-        P = {};
-        delta_P = [];
-        minLatency = 0;
-        IndexOfMinLatencyPath = 0;
-            
+        
         % get all nodes that are part of (content,layer)
         scki = getTreeNodes(G, ck , lk);
         
-        % count the number of paths we found fo current ck,lk
-        numberOfPathsFound = 0;
-        
-        % run over each node the content traverse thru and find the
-        % distance (latency) from receiver
         for v = scki'
             
-            % find shortest path (minimum latency) from  source/content to reciever       
-            % p : shortest path
-            % delta_p : latency of p
-            [p,delta_p] = shortestpath(H,v,dk);
+            % find shortest latency path in H
+            [ path, delta_p, sigma_p ] = lowLatencyPathBetweenNodes( H, v, dk );
+        
+            % add latency and jitter fron v to source
+            totalDeltaP = delta_p;% + nodeLatencyInTree(H, v, ck, lk);
+            totalSigmaP = sigma_p;% + nodeJitterInTree(H, v, ck, lk);
             
-            % update P if path is not empty
-            if ~isempty(p)
-                
-                % increase the counter of number of found paths
-                numberOfPathsFound = numberOfPathsFound + 1;
-                
-                % add path to P and delta_P
-                P{1,numberOfPathsFound} = p;
-                delta_P(numberOfPathsFound) = delta_p;
-                                
+            % check if the path meets the delay and jitter requirements
+            if( (totalDeltaP < ck_maximumLatency) &&  (totalSigmaP < ck_maximumJitter) )           
+                P = [P; {path} delta_p sigma_p];
             end
-  
+                
         end
         
-        % here, we finished to find all possible paths for current request
-
-        % if we couldn't  find any paths we skip upper layers
-        if isempty(P)        
+        % we found more than one path
+        if( ~isempty(P) )
             
-            % set current layer and upper layers as in valid
-            for lk_i = lk:getGlobal_numOfLayersPerContent()
-                rowToInvalid = requestTable.reciever==dk & requestTable.content==ck & requestTable.layer==lk_i;
-                requestTable.valid(rowToInvalid) = 0;
+            % select one path from P
+            path = lbsPathSelectionAlgorithm(H, P);
+                   
+            % serve path
+            [newG, newRequestTable] = servePath(requestTable, row, G, P(:,1), path, ck, lk, ck_bw);
+            G = newG;
+            requestTable = newRequestTable;
+        % we couldnt find any path
+        else
+
+            % if BL could not be served
+            if( lk == 0 )
+                
+                % invalidate current request and upper layers                
+                query=requestTable.reciever==dk & requestTable.content==ck;
+                indices=[1:size(query,1)]'.*query;
+                indices(indices==0) = [];
+                requestTable.valid(indices) = 0;
+                
+                layerSwitching(G, requestTable, ck, dk, lk);                              
+            
             end
             
-    
-        % if we did find one or more paths    
-        else        
-            
-            % choose the path with minimum latency
-            [minLatency IndexOfMinLatencyPath] = min(delta_P);
-            p = P{1,IndexOfMinLatencyPath};
-            
-            % add found paths to request table                        
-            requestTable.allPathsFound(row) = {P};
-            requestTable.allPathsFoundLatencies(row) = {delta_P};
-            requestTable.selectedPath(row) = {p};
-            requestTable.selectedPathLatency(row) = minLatency;
-            
-            % update the relevant tree in G with p
-            index = treeIndex(ck, lk);
-            G = updateAvialableBW(G, index, p, ck_bw);
-            
-        end        
-
+        end       
+        
+        % re validate all request in the request table
+        query=requestTable.valid==0;
+        indices=[1:size(query,1)]'.*query;
+        indices(indices==0) = [];
+        requestTable.valid(indices) = 1;
+  
+        % calc run time in [s]        
+        requestRunTime=toc;
+        runTime = runTime + requestRunTime;
+        
+        detailsRow = {ck, lk, dk, size(scki,1), size(P,1), requestRunTime};
+        details = [details ; detailsRow];
+        
+        %msg = ['LBSLS: ck= ', num2str(ck), ' lk= ', num2str(lk), ' dk= ', num2str(dk), ' sckiSize= ', num2str(size(scki,1)), ' Psize= ', num2str(size(P,1)), ' requestRunTime= ', num2str(requestRunTime)];
+        %disp(msg);
+                
     end
+
+    resultsRow = {G, requestTable, runTime, details};
+    results = [results ; resultsRow];
     
 end
-
-
-
-
-
-
-
-
-
-
-
-

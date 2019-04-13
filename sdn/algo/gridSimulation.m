@@ -1,7 +1,7 @@
 function [ results ] = gridSimulation( )
 
-    gridSize = [2:1:8];      
-    rep = 5;
+    gridSize = [2:1:2];      
+    rep = 1;
 
     results = cell2table(cell(0,5), 'VariableNames', {
         'gridSize', 
@@ -20,7 +20,8 @@ function [ results ] = gridSimulation( )
         for numOfRcv = numOfRcvArray                                    
             
             % build grid network
-            [G] = buildGridNetwork(N,numOfRcv);
+            %[G] = buildGridNetwork(N,numOfRcv);
+            [G] = buildGridNetwork4x4();
             %plotNetworkGraph( G );
 
             % build request table from G
