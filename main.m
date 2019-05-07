@@ -10,14 +10,14 @@ setGlobal_decodableLatencyThreshold(30);
 test = 4;
 
 if(test == 0)
-    [G] = buildNetwork();  
+    [G] = buildNetwork();
     firstContent = getGlobal_firstContent();
     save('network','G', 'firstContent');
 end
 
 if(test == 1)
     load('network','G', 'firstContent');
-    setGlobal_firstContent(firstContent);    
+    setGlobal_firstContent(firstContent);
 end
 
 if(test == 2)
@@ -28,7 +28,7 @@ if(test == 2)
 end
 
 if(test == 3)
-    [ results ] = gridSimulation( );    
+    [ results ] = gridSimulation( );
     save('grid4x4results3rep', 'results');
     return;
 end
@@ -39,7 +39,7 @@ if(test == 4)
 end
 
 if(test == 5)
-    [ results ] = gridSimulation( );    
+    [ results ] = gridSimulation( );
     save('grid14x14results3rep', 'results');
     return;
 end
@@ -50,7 +50,7 @@ if(test == 6)
 end
 
 if(test == 7)
-    [ results ] = gridSimulation( );    
+    [ results ] = gridSimulation( );
     save('grid6x6results3rep', 'results');
     return;
 end
@@ -64,5 +64,3 @@ if(test == 7)
     plotNetworkGraph( G );
     simulation(G);
 end
-
-
