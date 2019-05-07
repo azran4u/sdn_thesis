@@ -1,4 +1,4 @@
-function [ totalRevenue, requestTable ] = lbsRevenue( requestTable )
+function [ totalRevenue, requestTable ] = lbsRevenue( requestTable, w )
     
     totalRevenue = 0;
 
@@ -14,7 +14,7 @@ function [ totalRevenue, requestTable ] = lbsRevenue( requestTable )
         
         % if request is served
         if( ~isempty(gama_k_i.selectedPath) )
-            requestRevenue = lbsSingleRequestRevenue(duration, layer);
+            requestRevenue = lbsSingleRequestRevenue(duration, layer, w);
             requestTable.revenue(row) = requestRevenue;
             totalRevenue = totalRevenue + requestRevenue;
         end

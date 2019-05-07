@@ -1,6 +1,6 @@
-function [ revenue ] = lbsSingleRequestRevenue(duration, layer)    
+function [ revenue ] = lbsSingleRequestRevenue(duration, layer, w)    
     
-    layerRevenue = [8,1,0];
+    layerRevenue = w;
     revenue = layerRevenue(layer+1) * duration / sum(layerRevenue);
     
 end

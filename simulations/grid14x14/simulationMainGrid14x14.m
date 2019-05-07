@@ -1,11 +1,11 @@
-function [ results ] = simulationMainGrid4x4()
+function [ results ] = simulationMainGrid14x14()
     
     relative_path = 'sdn_thesis\simulations\grid4x4\';
-    N = 4; % network is NxN    
-    numOfRcvArray = [8 10 12 14 16];
-    numOfSources = 3;       
+    N = 14; % network is NxN    
+    numOfRcvArray = [14 45 90 196];
+    numOfSources = 8;       
     rep = 3; % number of repititons to run the simulation
-    weights = [8,1,0];
+    weights = [8,1,1];
 
     % simulation network parameters
     networkParameters = containers.Map('KeyType','char','ValueType','double');
@@ -53,7 +53,7 @@ function [ results ] = simulationMainGrid4x4()
 
         networkParameters('minNumOfSources') = numOfSources;
         networkParameters('maxNumOfSources') = numOfSources;        
-        networkParameters('contentSourceRatio') = 1;        
+        networkParameters('contentSourceRatio') = 100/8;        
         [G] = buildNetworkAddSources(G, networkParameters);
         graph = plotNetworkGraph( G );
         savefig(graph, strcat(relative_path, 'grid4x4RoutersAndSources RCV=', num2str(numOfRcv), '.fig'));    

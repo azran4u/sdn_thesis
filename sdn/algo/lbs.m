@@ -2,13 +2,13 @@
 %function [ G, requestTable, runTime, details ] = lbsls( G, requestTableInput )
 function [ results ] = lbs( G, requestTableInput )
    
-    results = cell2table(cell(0,5), 'VariableNames', {
+   
+    results = cell2table(cell(0,4), 'VariableNames', {
         'G', 
         'requestTable', 
-        'runTime',
-        'totalRevenue',
+        'runTime',        
         'details'});
-    
+
     details = cell2table(cell(0,6), 'VariableNames', {
         'ck', 
         'lk', 
@@ -160,11 +160,8 @@ function [ results ] = lbs( G, requestTableInput )
         %disp(msg);
                 
     end
-
-    [ totalRevenue, lbsOutputRequestTable ] = lbsRevenue( requestTable );
-    requestTable = lbsOutputRequestTable;
     
-    resultsRow = {G, requestTable, runTime, totalRevenue, details};
+    resultsRow = {G, requestTable, runTime, details};
     results = [results ; resultsRow];
     
 end

@@ -2,11 +2,10 @@
 %function [ G, requestTable, runTime, details ] = lbsls( G, requestTableInput )
 function [ results ] = llvs( G, requestTableInput )
 
-    results = cell2table(cell(0,5), 'VariableNames', {
+    results = cell2table(cell(0,4), 'VariableNames', {
         'G',
         'requestTable',
         'runTime',
-        'totalRevenue',
         'details'});
 
     details = cell2table(cell(0,5), 'VariableNames', {
@@ -125,10 +124,7 @@ function [ results ] = llvs( G, requestTableInput )
 
     end
 
-    [ totalRevenue, llvsOutputrequestTable ] = lbsRevenue( requestTable );
-    requestTable = llvsOutputrequestTable;
-
-    resultsRow = {G, requestTable, runTime, totalRevenue, details};
+    resultsRow = {G, requestTable, runTime, details};
     results = [results ; resultsRow];
-%    plotAllTrees( G, requestTable );
+
 end
