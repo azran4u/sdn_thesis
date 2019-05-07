@@ -1,4 +1,4 @@
-function [ G ] = buildGridNetwork(N, parameters)
+function [ G ] = buildGridNetwork(N, InputNumOfRcv)
     
     A = zeros(N);
     

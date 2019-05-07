@@ -7,6 +7,8 @@ addpath(genpath('sdn'));
 setGlobal_numOfLayersPerContent(3);
 setGlobal_decodableLatencyThreshold(30);
 
+simulationMainGrid4x4();
+
 test = 4;
 
 if(test == 0)

@@ -1,5 +1,7 @@
-function [] = grid4x4grpah(results)
+function [runTimeHandler, revenueHandler] = gridNetworkResultsGraphs(results)
+    
     x = unique(results.numOfRcv);
+    
     lbsRunTimeArray = [];
     llvsRunTimeArray = [];
     
@@ -27,14 +29,14 @@ function [] = grid4x4grpah(results)
     
     numberOfRequests = lbsRunTimeArray(:,1);
     
-    figure(1);
+    runTimeHandler = figure('Color','white');
     plot(numberOfRequests, lbsRunTimeArray(:,4), numberOfRequests, llvsRunTimeArray(:,4));
 %     title('Run time as a function of #requests');
     xlabel('Number of requests');
     ylabel('Run Time [sec]');
     legend({'LBS','LLVS'},'Location','northwest');
     
-    figure(2);
+    revenueHandler = figure;
     plot(numberOfRequests, lbsRevenueArray(:,4), numberOfRequests, llvsRevenueArray(:,4));
 %     title('Revenue as a function of #requests');
     xlabel('Number of requests');

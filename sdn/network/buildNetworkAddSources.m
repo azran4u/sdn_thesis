@@ -1,101 +1,37 @@
-function [ G ] = buildGridNetwork(N, parameters)
-    
-    A = zeros(N);
-    
-    for i = 1:size(A,1)
-        for j = 1:size(A,2)
-            A(i,j) = N*(i-1)+j;
-        end
-    end
-    
-    s = [];
-    t = [];
-    
-    for i = 1:size(A,1)
-        for j = 1:size(A,2)
-            
-            % up
-            if( i > 1 )
-                s = [s A(i,j)];
-                t = [t A(i-1,j)];
-            end
-            
-            % down
-            if( i < N )
-                s = [s A(i,j)];
-                t = [t A(i+1,j)];
-            end
-            
-            % left
-            if( j > 1)
-                s = [s A(i,j)];
-                t = [t A(i,j-1)];
-            end
-            
-            % right
-            if( j < N)
-                s = [s A(i,j)];
-                t = [t A(i,j+1)];
-            end
-            
-        end
-    end
+function [ G ] = buildNetworkAddSources(G, parameters)
     
     %*********** network parameters*************
-    minNumOfRouters = N*N;    
-    maxNumOfRouters = N*N;
-    %minEdgeRoutersRatio = 2;
-    %maxEdgeRoutersRatio = 4;
-    minBw = 60;
-    maxBw = 120;
-    minLatency = 2;
-    maxLatency = 6;
-    minJitter = 0;
-    maxJitter = 0;
-    minNumOfSources = 8;
-    maxNumOfSources = 8;
-    minNumOfRcvs = InputNumOfRcv;
-    maxNumOfRcvs = InputNumOfRcv;
-    numOfActiveRcvs = InputNumOfRcv;
-    contentSourceRatio = 100/8;
-    rcvContentRatio = 2;
-    contentMinAcceptedLatency = 0;
-    contentMaxAcceptedLatency = 130;
-    contentMinAcceptedJitter = 0;
-    contentMaxAcceptedJitter = 30;
-    baseLayerMaxBW = 3;
-    baseLayerMinBW = 1;
-    baseLayerIntervalBW = 1;
-    enhancementLayer1MaxBW = 6;
-    enhancementLayer1MinBW = 4;
-    enhancementLayer1IntervalBW = 1;
-    enhancementLayer2MaxBW = 8;
-    enhancementLayer2MinBW = 6;
-    enhancementLayer2IntervalBW = 1;
-    numOfTotalLayersPerContent = getGlobal_numOfLayersPerContent(); % Base layer (=0), Enhancement layer 1 (=1), Enhanacement layer 2 (=2).
-    numOfActiveLayersPerContent = 2; % layers for rcv's
-    
-    
-    % ******** add routers and links *****************
-    
-    % number of routers and links
+    minNumOfRouters = parameters('minNumOfRouters');  
+    maxNumOfRouters = parameters('maxNumOfRouters');  
+    minEdgeRoutersRatio = parameters('minEdgeRoutersRatio');  
+    maxEdgeRoutersRatio = parameters('maxEdgeRoutersRatio');  
+    minBw = parameters('minBw');  
+    maxBw = parameters('maxBw');  
+    minLatency = parameters('minLatency');  
+    maxLatency = parameters('maxLatency');  
+    minJitter = parameters('minJitter');  
+    maxJitter = parameters('maxJitter');  
+    minNumOfSources = parameters('minNumOfSources');  
+    maxNumOfSources = parameters('maxNumOfSources');  
+    contentSourceRatio = parameters('contentSourceRatio');  
+    contentMinAcceptedLatency = parameters('contentMinAcceptedLatency');  
+    contentMaxAcceptedLatency = parameters('contentMaxAcceptedLatency');  
+    contentMinAcceptedJitter = parameters('contentMinAcceptedJitter');  
+    contentMaxAcceptedJitter = parameters('contentMaxAcceptedJitter');  
+    baseLayerMaxBW = parameters('baseLayerMaxBW');  
+    baseLayerMinBW = parameters('baseLayerMinBW');  
+    baseLayerIntervalBW = parameters('baseLayerIntervalBW');  
+    enhancementLayer1MaxBW = parameters('enhancementLayer1MaxBW');  
+    enhancementLayer1MinBW = parameters('enhancementLayer1MinBW');  
+    enhancementLayer1IntervalBW = parameters('enhancementLayer1IntervalBW');  
+    enhancementLayer2MaxBW = parameters('enhancementLayer2MaxBW');  
+    enhancementLayer2MinBW = parameters('enhancementLayer2MinBW');  
+    enhancementLayer2IntervalBW = parameters('enhancementLayer2IntervalBW');  
+    numOfTotalLayersPerContent = parameters('numOfTotalLayersPerContent');  
+    numOfActiveLayersPerContent = parameters('numOfActiveLayersPerContent');   
+
     numOfRouters = randi([minNumOfRouters maxNumOfRouters],1,1);  
-    numOfEdges = size(s,2);
-   
-    bw = randi([minBw maxBw],1,numOfEdges)';
-    latency = randi([minLatency maxLatency],1,numOfEdges)';
-    jitter = randi([minJitter maxJitter],1,numOfEdges)';
-            
-    EdgeTable = table([s' t'], bw, latency, jitter, 'VariableNames',{'EndNodes' 'bw' 'latency' 'jitter'});
-   
-    % build graph from edge table
-    G = digraph(EdgeTable);
-    
-    % add nodes types - 'router'
-    types = cell(numOfRouters,1);
-    types(:) = {'router'};
-    G.Nodes.types = types;
-            
+
     % ******** add sources *****************
     numOfSources = randi([minNumOfSources,maxNumOfSources],1,1);
         
@@ -145,63 +81,8 @@ function [ G ] = buildGridNetwork(N, parameters)
     types(:) = {'content'};
     G.Nodes.types(s) = types; 
     
-    % ************** add recivers *****************    
-    contentNodes = find(strcmp('content',G.Nodes.types));
-    numOfContents = size(contentNodes, 1);
-    numOfRcv = randi([minNumOfRcvs,maxNumOfRcvs],1,1);
-    %numOfRcv = InputNumOfRcv;
-    %numOfRcv = numOfContents * rcvContentRatio;
-    
-    % each reciever is connected to one router. same router may serve
-    % multiple recievers
-    routerNodes = find(strcmp('router',G.Nodes.types));
-    lastHopRouters = randsample(routerNodes,numOfRcv, false)';
-    s = [lastHopRouters];    
-    t = [numnodes(G)+1:numnodes(G)+numOfRcv];
-   
-    % set links properties    
-    bw = repmat([inf], numOfRcv, 1);
-    latency = repmat([0], numOfRcv, 1);
-    jitter = repmat([0], numOfRcv, 1);
-    
-    % add to graph
-    EdgeTable = table([s' t'], bw, latency, jitter, 'VariableNames',{'EndNodes' 'bw' 'latency' 'jitter'});
-    G = addedge(G, EdgeTable);
-    
-    % set type as 'reciever'
-    types = cell( numOfRcv ,1);
-    types(:) = {'reciever'};
-    G.Nodes.types(t) = types;
-
-    % add for each reciever the priority (Gold=1, Silver=2, Bronze = 3, NA=0) 
-    numOfNodes = size(G.Nodes,1);    
-    recieverPriority = zeros(numOfNodes,1);
-    recieverNodes = find(strcmp('reciever',G.Nodes.types));
-    recieverPriority(recieverNodes) = randsample([1:1:3],numOfRcv, true);
-    G.Nodes.recieverPriority = recieverPriority;
-       
-%     s = RandStream.getGlobalStream;
-%     activeRcvs = randsample(recieverNodes,numOfActiveRcvs, false)';
-%     recieverPriority(activeRcvs) = 1;
-%     %recieverPriority(recieverNodes) = datasample(s,[1:1:3],numOfRcv,'Weights',[1/3 1/3 1/3]);
-%     G.Nodes.recieverPriority = recieverPriority;
-
-    
-    % add for each reciever the requested content (only one) 
-    requestedContent = zeros(numOfNodes,1);
-    recieverNodes = find(strcmp('reciever',G.Nodes.types));
-    
-    % handel the case which contentNodes is only one integer
-    requestedContent(recieverNodes) = contentNodes(randsample(length(contentNodes),numOfRcv, true));
-    
-    G.Nodes.requestedContent = requestedContent;
-    
-    % add for each reciever the requested layer (max)
-    requestedLayer = zeros(numOfNodes,1);
-    requestedLayer(recieverNodes) = repmat([numOfActiveLayersPerContent], numOfRcv, 1);   
-    G.Nodes.requestedLayer = requestedLayer;
-
     % add for each content it's priority (Critical=1, Regular=2, Low = 3) 
+    numOfNodes = size(G.Nodes,1); 
     contentPriority = zeros(numOfNodes,1);
     contentNodes = find(strcmp('content',G.Nodes.types));
     contentPriority(contentNodes) = randsample([1:1:3],numOfContents, true);
@@ -238,7 +119,7 @@ function [ G ] = buildGridNetwork(N, parameters)
     contentNodes = find(strcmp('content',G.Nodes.types));
     enhancementLayer2BW(contentNodes) = randsample([enhancementLayer2MinBW:enhancementLayer2IntervalBW:enhancementLayer2MaxBW],numOfContents, true);
     G.Nodes.enhancementLayer2BW = enhancementLayer2BW;
-   
+       
     % create new field for each node and edge that represents the usage of the graph element in the tree (content, layer)
     G.Nodes.treeLatency = ones(G.numnodes,numOfContents*getGlobal_numOfLayersPerContent())*inf;
     G.Nodes.treeJitter = ones(G.numnodes,numOfContents*getGlobal_numOfLayersPerContent())*inf;
