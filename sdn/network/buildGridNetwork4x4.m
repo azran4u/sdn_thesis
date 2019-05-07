@@ -1,7 +1,7 @@
-function [ G ] = buildGridNetwork4x4()
+function [ G ] = buildGridNetwork4x4(numOfRcv)
     
     N = 4; 
-    InputNumOfRcv = 6;
+    InputNumOfRcv = numOfRcv;
     
     A = zeros(N);
     
@@ -159,7 +159,7 @@ function [ G ] = buildGridNetwork4x4()
     % multiple recievers
     routerNodes = find(strcmp('router',G.Nodes.types));
     %lastHopRouters = randsample(routerNodes,numOfRcv, false)';
-    lastHopRouters = [1 5 6 9 10 15];
+    lastHopRouters = randsample([1 5 6 9 10 15],numOfRcv, true);
     s = [lastHopRouters];    
     t = [numnodes(G)+1:numnodes(G)+numOfRcv];
    

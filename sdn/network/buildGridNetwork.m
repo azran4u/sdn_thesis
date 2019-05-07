@@ -46,34 +46,34 @@ function [ G ] = buildGridNetwork(N, InputNumOfRcv)
     maxNumOfRouters = N*N;
     %minEdgeRoutersRatio = 2;
     %maxEdgeRoutersRatio = 4;
-    minBw = 4;
-    maxBw = 4;
-    minLatency = 1;
-    maxLatency = 1;
+    minBw = 60;
+    maxBw = 120;
+    minLatency = 2;
+    maxLatency = 6;
     minJitter = 0;
     maxJitter = 0;
-    minNumOfSources = 3;
-    maxNumOfSources = 3;
+    minNumOfSources = 8;
+    maxNumOfSources = 8;
     minNumOfRcvs = InputNumOfRcv;
     maxNumOfRcvs = InputNumOfRcv;
     numOfActiveRcvs = InputNumOfRcv;
-    contentSourceRatio = 4/3;
+    contentSourceRatio = 100/8;
     rcvContentRatio = 2;
-    contentMinAcceptedLatency = 10;
-    contentMaxAcceptedLatency = 10;
-    contentMinAcceptedJitter = 3;
-    contentMaxAcceptedJitter = 3;
-    baseLayerMaxBW = 1;
+    contentMinAcceptedLatency = 0;
+    contentMaxAcceptedLatency = 130;
+    contentMinAcceptedJitter = 0;
+    contentMaxAcceptedJitter = 30;
+    baseLayerMaxBW = 3;
     baseLayerMinBW = 1;
     baseLayerIntervalBW = 1;
-    enhancementLayer1MaxBW = 3;
-    enhancementLayer1MinBW = 3;
+    enhancementLayer1MaxBW = 6;
+    enhancementLayer1MinBW = 4;
     enhancementLayer1IntervalBW = 1;
-    enhancementLayer2MaxBW = 1;
-    enhancementLayer2MinBW = 1;
+    enhancementLayer2MaxBW = 8;
+    enhancementLayer2MinBW = 6;
     enhancementLayer2IntervalBW = 1;
-    numOfTotalLayersPerContent = getGlobal_numOfLayersPerContent()-1; % Base layer (=0), Enhancement layer 1 (=1), Enhanacement layer 2 (=2).
-    numOfActiveLayersPerContent = 1; % layers for rcv's
+    numOfTotalLayersPerContent = getGlobal_numOfLayersPerContent(); % Base layer (=0), Enhancement layer 1 (=1), Enhanacement layer 2 (=2).
+    numOfActiveLayersPerContent = 2; % layers for rcv's
     
     
     % ******** add routers and links *****************

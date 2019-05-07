@@ -1,27 +1,34 @@
 function [ results ] = gridSimulation( )
 
-    gridSize = [2:1:2];      
-    rep = 1;
+    gridSize = [1:1:1];      
+    rep = 3;
 
     results = cell2table(cell(0,5), 'VariableNames', {
         'gridSize', 
         'numOfRcv', 
         'rep', 
-        'runTime',
-        'LBSLdetails'});
+        'lbsResults',
+        'llvsResults'});
 
     totalRunTime = [];
     for i=1:size(gridSize, 2)
         
-        N = 2^gridSize(i);
+        N = 4;
+        numOfRcvArray = [8 10 12 14 16];
         
-        numOfRcvArray = [1, N/2, N].^2;
+%          N = 14;                
+%          numOfRcvArray = [16 98 196];
+
+%          N = 6;                
+%          numOfRcvArray = [9 18 36];
+
         rcvRunTime = [];
         for numOfRcv = numOfRcvArray                                    
             
             % build grid network
             %[G] = buildGridNetwork(N,numOfRcv);
-            [G] = buildGridNetwork4x4();
+            [G] = buildGridNetwork4x4(numOfRcv);
+            
             %plotNetworkGraph( G );
 
             % build request table from G
@@ -31,29 +38,19 @@ function [ results ] = gridSimulation( )
 
             repRunTime = [];
             for k = 1:rep
-                % run LBSLS
-                %[ tempG, tempRequestTable, runTime, LBSLSresults ] = lbsls( G, requestTable );
-                [ LBSLSresults ] = lbsls( G, requestTable );
-                runTime=LBSLSresults.runTime(1);
-                
-                %disp(['routers = ' , num2str(N*N), ' users =  ',  num2str(numOfRcv) , ' rep = ' , num2str(k), ' runTime= ', num2str(runTime)]);
-                
-                repRunTime = [repRunTime runTime];                
-                
-                
-                row = {N*N, numOfRcv, k, runTime, LBSLSresults};
+                % run LBSLS                
+                [ lbsResults ] = lbs( G, requestTable );
+         
+                % run LLVS
+                [ llvsResults ] = llvs( G, requestTable );
+                                   
+                row = {N*N, numOfRcv, k, lbsResults, llvsResults};
                 results = [results ; row];
                 
-            end
-
-            msg = ['grid size = ', num2str(N*N), ' rcv# = ', num2str(numOfRcv)];
-            disp(msg);
-            
-            rcvRunTime = [rcvRunTime ; repRunTime];            
-        end
-        
-        totalRunTime = [totalRunTime ; rcvRunTime];
-        
+                msg = ['grid size = ', num2str(N*N), ' rcv# = ', num2str(numOfRcv), ' rep# = ', num2str(k)];
+                disp(msg);                   
+            end                            
+        end                        
     end
 end
     
