@@ -35,7 +35,9 @@ function [ results ] = simulationMainGrid14x14()
     networkParameters('enhancementLayer2IntervalBW') = 1;
     networkParameters('numOfTotalLayersPerContent') = getGlobal_numOfLayersPerContent(); % Base layer (=0), Enhancement layer 1 (=1), Enhanacement layer 2 (=2).
     networkParameters('numOfActiveLayersPerContent') = 2; % layers for rcv's
-    
+    networkParameters('rcvContentRatio') = 2;
+    networkParameters('contentSourceRatio') = 100/8;    
+
     % simulation results
     results = cell2table(cell(0,5), 'VariableNames', {
         'gridSize', 
@@ -53,8 +55,7 @@ function [ results ] = simulationMainGrid14x14()
         close(graph);
 
         networkParameters('minNumOfSources') = numOfSources;
-        networkParameters('maxNumOfSources') = numOfSources;        
-        networkParameters('contentSourceRatio') = 100/8;        
+        networkParameters('maxNumOfSources') = numOfSources;                    
         [G] = buildNetworkAddSources(G, networkParameters);
         graph = plotNetworkGraph( G );
         savefig(graph, strcat(relative_path, label, 'RoutersAndSources RCV=', num2str(numOfRcv), '.fig'));    
@@ -62,8 +63,7 @@ function [ results ] = simulationMainGrid14x14()
 
         networkParameters('minNumOfRcvs') = numOfRcv;
         networkParameters('maxNumOfRcvs') = numOfRcv;
-        networkParameters('numOfActiveRcvs') = numOfRcv;   
-        networkParameters('rcvContentRatio') = 2;
+        networkParameters('numOfActiveRcvs') = numOfRcv;           
         [G] = buildNetworkAddSubscribers(G, networkParameters);
         graph = plotNetworkGraph( G );
         savefig(graph, strcat(relative_path, label, 'RoutersAndSourcesAndSubscribers RCV=', num2str(numOfRcv), '.fig'));    
