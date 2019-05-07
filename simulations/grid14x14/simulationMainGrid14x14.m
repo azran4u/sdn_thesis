@@ -49,7 +49,7 @@ function [ results ] = simulationMainGrid14x14()
         % build grid network     
         [G] = buildGridNetworkRouters(N, networkParameters);
         graph = plotNetworkGraph( G );
-        savefig(graph, strcat(relative_path, 'grid4x4Routers RCV=', num2str(numOfRcv),'.fig'));    
+        savefig(graph, strcat(relative_path, label, 'Routers RCV=', num2str(numOfRcv),'.fig'));    
         close(graph);
 
         networkParameters('minNumOfSources') = numOfSources;
@@ -57,7 +57,7 @@ function [ results ] = simulationMainGrid14x14()
         networkParameters('contentSourceRatio') = 100/8;        
         [G] = buildNetworkAddSources(G, networkParameters);
         graph = plotNetworkGraph( G );
-        savefig(graph, strcat(relative_path, 'grid4x4RoutersAndSources RCV=', num2str(numOfRcv), '.fig'));    
+        savefig(graph, strcat(relative_path, label, 'RoutersAndSources RCV=', num2str(numOfRcv), '.fig'));    
         close(graph);
 
         networkParameters('minNumOfRcvs') = numOfRcv;
@@ -66,7 +66,7 @@ function [ results ] = simulationMainGrid14x14()
         networkParameters('rcvContentRatio') = 2;
         [G] = buildNetworkAddSubscribers(G, networkParameters);
         graph = plotNetworkGraph( G );
-        savefig(graph, strcat(relative_path, 'grid4x4RoutersAndSourcesAndSubscribers RCV=', num2str(numOfRcv), '.fig'));    
+        savefig(graph, strcat(relative_path, label, 'RoutersAndSourcesAndSubscribers RCV=', num2str(numOfRcv), '.fig'));    
         close(graph);
 
         % build request table from G
@@ -95,7 +95,7 @@ function [ results ] = simulationMainGrid14x14()
         end             
         
         firstContent = getGlobal_firstContent();
-        filename = strcat(relative_path, 'grid4x4results Nodes=', num2str(N*N), ' RCV=' , num2str(numOfRcv)); 
+        filename = strcat(relative_path, label, 'results Nodes=', num2str(N*N), ' RCV=' , num2str(numOfRcv)); 
         save(filename,'G', 'firstContent');
         
     end                        
