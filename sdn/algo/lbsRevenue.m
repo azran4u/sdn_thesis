@@ -10,11 +10,10 @@ function [ totalRevenue, requestTable ] = lbsRevenue( requestTable )
         
         % extract values from request        
         duration = gama_k_i.duration;
-        layer = gama_k_i.layer;
-        latency = gama_k_i.selectedPathLatency;
+        layer = gama_k_i.layer;        
         
         % if request is served
-        if( latency > 0 )
+        if( ~isempty(gama_k_i.selectedPath) )
             requestRevenue = lbsSingleRequestRevenue(duration, layer);
             requestTable.revenue(row) = requestRevenue;
             totalRevenue = totalRevenue + requestRevenue;
