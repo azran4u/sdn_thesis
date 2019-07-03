@@ -5,7 +5,7 @@ function [ results ] = simulationMainGrid14x14()
     N = 14; % network is NxN    
     numOfRcvArray = [14 45 90 196];
     numOfSources = 8;       
-    rep = 3; % number of repititons to run the simulation
+    rep = 5; % number of repititons to run the simulation
     weights = [8,1,1];
 
     % simulation network parameters
@@ -99,6 +99,9 @@ function [ results ] = simulationMainGrid14x14()
         save(filename,'G', 'firstContent');
         
     end                        
+    
+    filename = strcat(relative_path, label, 'results'); 
+    save(filename, 'results');
     
     [runTimeHandler, revenueHandler] = gridNetworkResultsGraphs(results);
     

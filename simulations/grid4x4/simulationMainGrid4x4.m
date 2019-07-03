@@ -3,11 +3,11 @@ function [ results ] = simulationMainGrid4x4()
     label = 'grid4x4';
     relative_path = 'sdn_thesis\simulations\grid4x4\';
     N = 4; % network is NxN    
-    %numOfRcvArray = [8 10 12 14 16];
-    numOfRcvArray = [8 10];
+    numOfRcvArray = [8 10 12 14 16];
+    %numOfRcvArray = [8 10];
     numOfSources = 3;       
-    %rep = 3; % number of repititons to run the simulation
-    rep = 2; % number of repititons to run the simulation
+    rep = 5; % number of repititons to run the simulation
+    %rep = 2; % number of repititons to run the simulation
     weights = [8,1,0];
 
     % simulation network parameters
