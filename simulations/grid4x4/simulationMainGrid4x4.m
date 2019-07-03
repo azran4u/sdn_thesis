@@ -1,7 +1,7 @@
 function [ results ] = simulationMainGrid4x4()
     
     label = 'grid4x4';
-    relative_path = 'sdn_thesis\simulations\grid4x4\';
+    relative_path = 'C:\Users\azran4u\Documents\GitHub\sdn_thesis\simulations\grid4x4\';
     N = 4; % network is NxN    
     numOfRcvArray = [8 10 12 14 16];
     %numOfRcvArray = [8 10];
