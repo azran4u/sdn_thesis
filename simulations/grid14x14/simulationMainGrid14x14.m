@@ -99,8 +99,6 @@ function [ results ] = simulationMainGrid14x14()
         save(filename,'G', 'firstContent');
         
     end                        
-
-
     
     [runTimeHandler, revenueHandler] = gridNetworkResultsGraphs(results);
     

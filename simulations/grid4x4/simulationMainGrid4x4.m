@@ -3,9 +3,11 @@ function [ results ] = simulationMainGrid4x4()
     label = 'grid4x4';
     relative_path = 'sdn_thesis\simulations\grid4x4\';
     N = 4; % network is NxN    
-    numOfRcvArray = [8 10 12 14 16];
+    %numOfRcvArray = [8 10 12 14 16];
+    numOfRcvArray = [8 10];
     numOfSources = 3;       
-    rep = 3; % number of repititons to run the simulation
+    %rep = 3; % number of repititons to run the simulation
+    rep = 2; % number of repititons to run the simulation
     weights = [8,1,0];
 
     % simulation network parameters
@@ -98,7 +100,19 @@ function [ results ] = simulationMainGrid4x4()
         filename = strcat(relative_path, label, 'results Nodes=', num2str(N*N), ' RCV=' , num2str(numOfRcv)); 
         save(filename,'G', 'firstContent');
         
-    end                        
+    end                    
+    
+    filename = strcat(relative_path, label, 'results'); 
+    save(filename, 'results');
+    
+    [runTimeHandler, revenueHandler] = gridNetworkResultsGraphs(results);
+    
+    savefig(runTimeHandler, strcat(relative_path, label, 'RunTime.fig') );    
+    close(runTimeHandler);
+    
+    savefig(revenueHandler, strcat(relative_path, label , 'Revenue.fig') );
+    close(revenueHandler);
+
 end
     
    
